@@ -1292,6 +1292,308 @@ button:active {
 }
 
 /* =========================================================
+   ENEMY INTRODUCTION
+========================================================= */
+
+.enemy-intro {
+    width: min(620px, 90vw);
+}
+
+
+.enemy-intro-card {
+
+    margin-top: 28px;
+
+    padding: 28px 34px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(14, 27, 44, 0.94),
+            rgba(5, 12, 22, 0.97)
+        );
+
+    border:
+        1px solid
+        rgba(114, 215, 255, 0.14);
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 20px 70px
+        rgba(0, 0, 0, 0.45),
+
+        inset 0 0 30px
+        rgba(114, 215, 255, 0.025);
+
+    animation:
+        enemyIntroIn
+        0.6s
+        cubic-bezier(.22, 1, .36, 1);
+}
+
+
+.enemy-intro-label {
+
+    margin-bottom: 18px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: 0.25em;
+
+    color: #ff5577;
+}
+
+
+/* =========================================================
+   ENEMY PREVIEW
+========================================================= */
+
+.enemy-preview {
+
+    width: 130px;
+    height: 130px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            color-mix(
+                in srgb,
+                var(--enemy-color) 18%,
+                transparent
+            ),
+            transparent 70%
+        );
+
+    animation:
+        enemyPreviewPulse
+        2s
+        ease-in-out
+        infinite;
+}
+
+
+.enemy-preview::before {
+
+    content: "";
+
+    width: var(--enemy-size);
+    height: var(--enemy-size);
+
+    border-radius: 50%;
+
+    background:
+        var(--enemy-color);
+
+    box-shadow:
+        0 0 25px
+        color-mix(
+            in srgb,
+            var(--enemy-color) 50%,
+            transparent
+        );
+
+    animation:
+        enemyCorePulse
+        1.8s
+        ease-in-out
+        infinite;
+}
+
+
+.enemy-preview-core {
+
+    position: absolute;
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: #eef5ff;
+
+    box-shadow:
+        0 0 14px
+        #eef5ff;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   INTRO TEXT
+========================================================= */
+
+.enemy-intro-name {
+
+    margin-bottom: 18px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 20px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
+
+    color: #eef5ff;
+}
+
+
+.enemy-intro-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 14px;
+}
+
+
+.enemy-intro-stats div {
+
+    padding: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.07);
+
+    border-radius: 9px;
+}
+
+
+.enemy-intro-stats span {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 8px;
+
+    letter-spacing: 0.15em;
+
+    color: #64748b;
+}
+
+
+.enemy-intro-stats strong {
+
+    font-family: "Montserrat", sans-serif;
+
+    font-size: 13px;
+
+    color: #dcecff;
+}
+
+
+.enemy-intro-ability {
+
+    padding-top: 14px;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.06);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+    color: #8b9ab0;
+}
+
+
+/* =========================================================
+   INTRO ANIMATION
+========================================================= */
+
+@keyframes enemyIntroIn {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(20px)
+            scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
+
+
+@keyframes enemyPreviewPulse {
+
+    0%,
+    100% {
+        transform: scale(0.96);
+    }
+
+    50% {
+        transform: scale(1.04);
+    }
+
+}
+
+
+@keyframes enemyCorePulse {
+
+    0%,
+    100% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .enemy-intro-card {
+        padding: 24px 20px;
+    }
+
+    .enemy-preview {
+        width: 105px;
+        height: 105px;
+    }
+
+}
+
+/* =========================================================
    RESPONSIVE
 ========================================================= */
 
