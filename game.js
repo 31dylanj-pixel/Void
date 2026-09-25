@@ -58,12 +58,7 @@ let kills = 0;
 
 let roomEnemiesRequired = 0;
 let roomKills = 0;
-
-let activeEnemies = 0;
-
-let lastTime = 0;
-let spawnTimer = 0;
-
+let roomSpawned = 0;
 
 /* =========================================================
    INPUT
@@ -245,6 +240,7 @@ const continueButton = document.getElementById("continue-button");
 const clearTitle = document.getElementById("clear-title");
 const clearMessage = document.getElementById("clear-message");
 const crosshair = document.getElementById("crosshair");
+crosshair.style.display = "none";
 
 const startButton = document.getElementById("start-button");
 const restartButton = document.getElementById("restart-button");
@@ -269,6 +265,8 @@ function showRoomTransition(roomNumber) {
 
     transitioning = true;
     gameRunning = false;
+
+    crosshair.style.display = "none";
 
     const overlay = document.createElement("section");
 
@@ -365,13 +363,13 @@ function startGame() {
 ========================================================= */
 
 function beginRoom(roomNumber) {
-
+    roomSpawned = 0;
     depth = roomNumber;
 
-    roomEnemiesRequired = ROOM_ENEMIES[roomNumber - 1];
+    roomEnemiesRequired =
+        ROOM_ENEMIES[roomNumber - 1];
 
     roomKills = 0;
-    activeEnemies = 0;
 
     enemies = [];
     bullets = [];
@@ -389,9 +387,10 @@ function beginRoom(roomNumber) {
 
     gameRunning = true;
 
+    crosshair.style.display = "block";
+
     updateHUD();
 }
-
 
 /* =========================================================
    ROOM SCALE
@@ -435,28 +434,19 @@ function getWorldCenter() {
 ========================================================= */
 
 function getEnemiesRemaining() {
-
-    return Math.max(
-        0,
-        roomEnemiesRequired - roomKills
-    );
-
+    return enemies.length;
 }
-
 
 /* =========================================================
    ROOM PROGRESS
 ========================================================= */
 
 function roomIsComplete() {
-
     return (
-        roomKills >= roomEnemiesRequired &&
+        roomSpawned >= roomEnemiesRequired &&
         enemies.length === 0
     );
-
 }
-
 
 /* =========================================================
    SPAWN SETTINGS
@@ -488,7 +478,7 @@ function getSpawnDelay() {
 
 function spawnEnemy() {
 
-    if (roomKills >= roomEnemiesRequired) {
+    if (roomSpawned >= roomEnemiesRequired) {
         return;
     }
 
@@ -496,28 +486,32 @@ function spawnEnemy() {
         return;
     }
 
-    const angle = Math.random() * Math.PI * 2;
+    const angle =
+        Math.random() * Math.PI * 2;
 
-    const worldScale = getWorldScale();
-
-    /*
-        Spawn farther away as rooms get larger.
-    */
+    const worldScale =
+        getWorldScale();
 
     const spawnDistance =
-        Math.max(canvas.width, canvas.height) *
+        Math.max(
+            canvas.width,
+            canvas.height
+        ) *
         0.55 *
         worldScale;
 
-    const center = getWorldCenter();
+    const center =
+        getWorldCenter();
 
     const x =
         center.x +
-        Math.cos(angle) * spawnDistance;
+        Math.cos(angle) *
+        spawnDistance;
 
     const y =
         center.y +
-        Math.sin(angle) * spawnDistance;
+        Math.sin(angle) *
+        spawnDistance;
 
     const health =
         45 +
@@ -546,9 +540,8 @@ function spawnEnemy() {
 
     });
 
-    activeEnemies++;
+    roomSpawned++;
 }
-
 
 /* =========================================================
    BULLET
@@ -788,30 +781,27 @@ function updateEnemies(dt) {
         */
 
         if (
-            distance <
-            player.radius +
-            enemy.radius
-        ) {
-
-            player.health -=
-                enemy.damage;
-
-            createExplosion(
-                enemy.x,
-                enemy.y
-            );
-
-            enemies.splice(i, 1);
-
-            activeEnemies--;
-
-            if (player.health <= 0) {
-
-                player.health = 0;
-
-                finishGame();
-            }
-        }
+             distance <
+             player.radius +
+             enemy.radius
+         ) {
+             player.health -= enemy.damage * dt;
+         
+             const knockback = 120 * dt;
+         
+             enemy.x -=
+                 (dx / distance) *
+                 knockback;
+         
+             enemy.y -=
+                 (dy / distance) *
+                 knockback;
+         
+             if (player.health <= 0) {
+                 player.health = 0;
+                 finishGame();
+             }
+         }
     }
 }
 
@@ -904,8 +894,6 @@ function killEnemy(index) {
 
     enemies.splice(index, 1);
 
-    activeEnemies--;
-
     updateHUD();
 }
 
@@ -989,8 +977,9 @@ function updateParticles(dt) {
 ========================================================= */
 
 function completeRoom() {
-
     gameRunning = false;
+
+    crosshair.style.display = "none";
 
     clearTitle.textContent =
         `ROOM ${depth} CLEARED`;
@@ -1003,21 +992,16 @@ function completeRoom() {
     clearScreen.classList.remove("hidden");
 
     setTimeout(() => {
-
         clearScreen.classList.add("hidden");
 
         if (depth >= MAX_ROOMS) {
-
             finishRun();
-
             return;
         }
 
         showUpgradeScreen();
-
     }, 1100);
 }
-
 
 /* =========================================================
    UPGRADE COST
@@ -1131,6 +1115,7 @@ function applyUpgrade(key) {
 ========================================================= */
 
 function showUpgradeScreen() {
+    crosshair.style.display = "none";
 
     upgradeScreen.classList.remove("hidden");
 
@@ -1252,15 +1237,15 @@ continueButton.addEventListener(
 ========================================================= */
 
 function finishGame() {
-
     gameRunning = false;
     gameOver = true;
+
+    crosshair.style.display = "none";
 
     deathScreen.classList.remove(
         "hidden"
     );
 }
-
 
 /* =========================================================
    FINAL ROOM
@@ -1730,31 +1715,22 @@ function gameLoop(timestamp) {
 
         updateParticles(dt);
 
-        /*
-            Spawn replacement enemies until
-            the room's required kill count is reached.
-        */
+        /*Spawn the fixed number of enemies assigned to this room.*/
 
-        if (
-            roomKills <
-            roomEnemiesRequired
-        ) {
-
-            spawnTimer -= dt;
-
-            if (spawnTimer <= 0) {
-
-                spawnEnemy();
-
-                spawnTimer =
-                    getSpawnDelay();
-            }
-        }
+        if (roomSpawned < roomEnemiesRequired) {
+             spawnTimer -= dt;
+         
+             if (spawnTimer <= 0) {
+                 spawnEnemy();
+         
+                 spawnTimer = getSpawnDelay();
+             }
+         }
 
         /*
-            Room is complete only when:
-            - required kills have happened
-            - no enemies remain alive
+             Room is complete when:
+             - all required enemies have spawned
+             - no enemies remain alive
         */
 
         if (roomIsComplete()) {
