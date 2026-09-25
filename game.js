@@ -1,6 +1,6 @@
 /* =========================================================
-   VOID — PHASE 1C
-   Rooms + Upgrade System
+   VOID — PHASE 1D
+   Rooms + Scrap Upgrades + Weapon Upgrades
 ========================================================= */
 
 const canvas = document.getElementById("gameCanvas");
@@ -49,33 +49,97 @@ const particles = [];
 ========================================================= */
 
 const player = {
+
     x: canvas.width / 2,
     y: canvas.height / 2,
 
-    radius: 15,
+    radius: 16,
 
-    baseSpeed: 270,
     speed: 270,
-
-    baseDamage: 25,
-    damage: 25,
 
     maxHealth: 100,
     health: 100,
+
+    damage: 25,
+
+    fireRate: 0.16,
+
+    bulletSpeed: 720,
+
+    multishot: 1,
 
     angle: 0
 };
 
 
 /* =========================================================
-   ROOM DATA
+   UPGRADE DATA
+========================================================= */
+
+const upgrades = {
+
+    health: {
+        name: "REINFORCED CORE",
+        description: tier => `+20% Maximum HP`,
+        baseCost: 15,
+        tier: 0
+    },
+
+    speed: {
+        name: "OVERDRIVE",
+        description: tier => `+10% Movement Speed`,
+        baseCost: 15,
+        tier: 0
+    },
+
+    damage: {
+        name: "AMPLIFIED ROUND",
+        description: tier => `+15% Weapon Damage`,
+        baseCost: 20,
+        tier: 0
+    },
+
+    fireRate: {
+        name: "RAPID FIRE",
+        description: tier => `+10% Fire Rate`,
+        baseCost: 25,
+        tier: 0
+    },
+
+    bulletSpeed: {
+        name: "ACCELERATOR",
+        description: tier => `+15% Bullet Speed`,
+        baseCost: 20,
+        tier: 0
+    },
+
+    multishot: {
+        name: "SPLIT ROUND",
+        description: tier => `+1 Projectile`,
+        baseCost: 40,
+        tier: 0
+    }
+};
+
+
+/* =========================================================
+   UPGRADE COST
+========================================================= */
+
+function getUpgradeCost(upgrade) {
+
+    return Math.floor(
+        upgrade.baseCost *
+        Math.pow(1.5, upgrade.tier)
+    );
+}
+
+
+/* =========================================================
+   ROOM ENEMY COUNT
 ========================================================= */
 
 function getRoomEnemyCount() {
-
-    // Room 1 = 5
-    // Room 2 = 7
-    // Room 3 = 9
 
     return 4 + depth * 2;
 }
@@ -87,10 +151,21 @@ function getRoomEnemyCount() {
 
 function startGame() {
 
-    document.getElementById("start-screen").classList.add("hidden");
-    document.getElementById("death-screen").classList.add("hidden");
-    document.getElementById("clear-screen").classList.add("hidden");
-    document.getElementById("upgrade-screen").classList.add("hidden");
+    document
+        .getElementById("start-screen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("death-screen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("clear-screen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("upgrade-screen")
+        .classList.add("hidden");
 
     resetGame();
 
@@ -103,7 +178,7 @@ function startGame() {
 
 
 /* =========================================================
-   RESET
+   RESET GAME
 ========================================================= */
 
 function resetGame() {
@@ -119,11 +194,27 @@ function resetGame() {
     transitioning = false;
     upgradeScreen = false;
 
+    /* Reset player */
+
     player.maxHealth = 100;
     player.health = 100;
 
     player.speed = 270;
+
     player.damage = 25;
+
+    player.fireRate = 0.16;
+
+    player.bulletSpeed = 720;
+
+    player.multishot = 1;
+
+    /* Reset upgrade tiers */
+
+    for (const key in upgrades) {
+
+        upgrades[key].tier = 0;
+    }
 
     player.x = canvas.width / 2;
     player.y = canvas.height / 2;
@@ -142,13 +233,17 @@ function startRoom() {
     enemies.length = 0;
 
     roomEnemiesDefeated = 0;
-    roomEnemiesTotal = getRoomEnemyCount();
+
+    roomEnemiesTotal =
+        getRoomEnemyCount();
 
     enemySpawnTimer = 0;
 
     updateProgress();
 
-    document.getElementById("room-status").textContent =
+    document
+        .getElementById("room-status")
+        .textContent =
         `ROOM ${depth} / ${MAX_ROOMS}`;
 }
 
@@ -161,17 +256,26 @@ window.addEventListener("keydown", e => {
 
     keys[e.key.toLowerCase()] = true;
 
-    // Prevent page scrolling
     if (
-        ["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"]
-        .includes(e.key.toLowerCase())
+        [
+            "w",
+            "a",
+            "s",
+            "d",
+            "arrowup",
+            "arrowdown",
+            "arrowleft",
+            "arrowright"
+        ].includes(e.key.toLowerCase())
     ) {
+
         e.preventDefault();
     }
 });
 
 
 window.addEventListener("keyup", e => {
+
     keys[e.key.toLowerCase()] = false;
 });
 
@@ -212,10 +316,14 @@ canvas.addEventListener("mouseup", e => {
 
 function updateCrosshair() {
 
-    const crosshair = document.getElementById("crosshair");
+    const crosshair =
+        document.getElementById("crosshair");
 
-    crosshair.style.left = `${mouse.x}px`;
-    crosshair.style.top = `${mouse.y}px`;
+    crosshair.style.left =
+        `${mouse.x}px`;
+
+    crosshair.style.top =
+        `${mouse.y}px`;
 }
 
 
@@ -225,9 +333,15 @@ function updateCrosshair() {
 
 function gameLoop(time) {
 
-    if (!gameRunning) return;
+    if (!gameRunning) {
+        return;
+    }
 
-    const dt = Math.min((time - lastTime) / 1000, 0.033);
+    const dt =
+        Math.min(
+            (time - lastTime) / 1000,
+            0.033
+        );
 
     lastTime = time;
 
@@ -247,7 +361,6 @@ function update(dt) {
     if (transitioning || upgradeScreen) {
 
         updateParticles(dt);
-        draw();
 
         return;
     }
@@ -272,11 +385,15 @@ function update(dt) {
 
     shootCooldown -= dt;
 
-    if (mouse.down && shootCooldown <= 0) {
+    if (
+        mouse.down &&
+        shootCooldown <= 0
+    ) {
 
         shoot();
 
-        shootCooldown = 0.16;
+        shootCooldown =
+            player.fireRate;
     }
 
     updateHUD();
@@ -286,7 +403,7 @@ function update(dt) {
 
 
 /* =========================================================
-   PLAYER MOVEMENT
+   PLAYER
 ========================================================= */
 
 function updatePlayer(dt) {
@@ -294,42 +411,66 @@ function updatePlayer(dt) {
     let dx = 0;
     let dy = 0;
 
-    if (keys["w"] || keys["arrowup"]) {
-        dy -= 1;
+    if (
+        keys["w"] ||
+        keys["arrowup"]
+    ) {
+        dy--;
     }
 
-    if (keys["s"] || keys["arrowdown"]) {
-        dy += 1;
+    if (
+        keys["s"] ||
+        keys["arrowdown"]
+    ) {
+        dy++;
     }
 
-    if (keys["a"] || keys["arrowleft"]) {
-        dx -= 1;
+    if (
+        keys["a"] ||
+        keys["arrowleft"]
+    ) {
+        dx--;
     }
 
-    if (keys["d"] || keys["arrowright"]) {
-        dx += 1;
+    if (
+        keys["d"] ||
+        keys["arrowright"]
+    ) {
+        dx++;
     }
 
     if (dx !== 0 || dy !== 0) {
 
-        const length = Math.sqrt(dx * dx + dy * dy);
+        const length =
+            Math.sqrt(dx * dx + dy * dy);
 
         dx /= length;
         dy /= length;
 
-        player.x += dx * player.speed * dt;
-        player.y += dy * player.speed * dt;
+        player.x +=
+            dx * player.speed * dt;
+
+        player.y +=
+            dy * player.speed * dt;
     }
 
-    player.x = Math.max(
-        player.radius,
-        Math.min(canvas.width - player.radius, player.x)
-    );
+    player.x =
+        Math.max(
+            player.radius,
+            Math.min(
+                canvas.width - player.radius,
+                player.x
+            )
+        );
 
-    player.y = Math.max(
-        player.radius,
-        Math.min(canvas.height - player.radius, player.y)
-    );
+    player.y =
+        Math.max(
+            player.radius,
+            Math.min(
+                canvas.height - player.radius,
+                player.y
+            )
+        );
 }
 
 
@@ -339,20 +480,49 @@ function updatePlayer(dt) {
 
 function shoot() {
 
-    const speed = 720;
+    const spread = 0.12;
 
-    bullets.push({
+    for (
+        let i = 0;
+        i < player.multishot;
+        i++
+    ) {
 
-        x: player.x + Math.cos(player.angle) * 20,
-        y: player.y + Math.sin(player.angle) * 20,
+        let angle =
+            player.angle;
 
-        vx: Math.cos(player.angle) * speed,
-        vy: Math.sin(player.angle) * speed,
+        if (player.multishot > 1) {
 
-        radius: 4,
+            const center =
+                (player.multishot - 1) / 2;
 
-        damage: player.damage
-    });
+            angle +=
+                (i - center) * spread;
+        }
+
+        bullets.push({
+
+            x:
+                player.x +
+                Math.cos(angle) * 20,
+
+            y:
+                player.y +
+                Math.sin(angle) * 20,
+
+            vx:
+                Math.cos(angle) *
+                player.bulletSpeed,
+
+            vy:
+                Math.sin(angle) *
+                player.bulletSpeed,
+
+            radius: 4,
+
+            damage: player.damage
+        });
+    }
 
     createMuzzleFlash();
 }
@@ -364,12 +534,20 @@ function shoot() {
 
 function updateBullets(dt) {
 
-    for (let i = bullets.length - 1; i >= 0; i--) {
+    for (
+        let i = bullets.length - 1;
+        i >= 0;
+        i--
+    ) {
 
-        const bullet = bullets[i];
+        const bullet =
+            bullets[i];
 
-        bullet.x += bullet.vx * dt;
-        bullet.y += bullet.vy * dt;
+        bullet.x +=
+            bullet.vx * dt;
+
+        bullet.y +=
+            bullet.vy * dt;
 
         if (
             bullet.x < -50 ||
@@ -383,18 +561,35 @@ function updateBullets(dt) {
             continue;
         }
 
-        for (let j = enemies.length - 1; j >= 0; j--) {
+        for (
+            let j = enemies.length - 1;
+            j >= 0;
+            j--
+        ) {
 
-            const enemy = enemies[j];
+            const enemy =
+                enemies[j];
 
-            const dx = bullet.x - enemy.x;
-            const dy = bullet.y - enemy.y;
+            const dx =
+                bullet.x - enemy.x;
 
-            const distance = Math.sqrt(dx * dx + dy * dy);
+            const dy =
+                bullet.y - enemy.y;
 
-            if (distance < bullet.radius + enemy.radius) {
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                );
 
-                enemy.health -= bullet.damage;
+            if (
+                distance <
+                bullet.radius +
+                enemy.radius
+            ) {
+
+                enemy.health -=
+                    bullet.damage;
 
                 bullets.splice(i, 1);
 
@@ -403,7 +598,9 @@ function updateBullets(dt) {
                     bullet.y
                 );
 
-                if (enemy.health <= 0) {
+                if (
+                    enemy.health <= 0
+                ) {
 
                     killEnemy(j);
                 }
@@ -424,29 +621,48 @@ function spawnEnemy() {
     let x;
     let y;
 
-    const side = Math.floor(Math.random() * 4);
+    const side =
+        Math.floor(
+            Math.random() * 4
+        );
 
     const padding = 60;
 
     if (side === 0) {
 
-        x = Math.random() * canvas.width;
+        x =
+            Math.random() *
+            canvas.width;
+
         y = -padding;
 
     } else if (side === 1) {
 
-        x = canvas.width + padding;
-        y = Math.random() * canvas.height;
+        x =
+            canvas.width +
+            padding;
+
+        y =
+            Math.random() *
+            canvas.height;
 
     } else if (side === 2) {
 
-        x = Math.random() * canvas.width;
-        y = canvas.height + padding;
+        x =
+            Math.random() *
+            canvas.width;
+
+        y =
+            canvas.height +
+            padding;
 
     } else {
 
         x = -padding;
-        y = Math.random() * canvas.height;
+
+        y =
+            Math.random() *
+            canvas.height;
     }
 
     enemies.push({
@@ -456,11 +672,14 @@ function spawnEnemy() {
 
         radius: 17,
 
-        health: 50 + depth * 5,
+        health:
+            50 + depth * 5,
 
-        maxHealth: 50 + depth * 5,
+        maxHealth:
+            50 + depth * 5,
 
-        speed: 65 + depth * 8,
+        speed:
+            65 + depth * 8,
 
         damage: 20
     });
@@ -469,14 +688,26 @@ function spawnEnemy() {
 
 function updateEnemies(dt) {
 
-    for (let i = enemies.length - 1; i >= 0; i--) {
+    for (
+        let i = enemies.length - 1;
+        i >= 0;
+        i--
+    ) {
 
-        const enemy = enemies[i];
+        const enemy =
+            enemies[i];
 
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
+        const dx =
+            player.x - enemy.x;
 
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        const dy =
+            player.y - enemy.y;
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
 
         if (distance > 0) {
 
@@ -491,16 +722,16 @@ function updateEnemies(dt) {
                 dt;
         }
 
-        /* -----------------------------------------
-           PLAYER CONTACT
-        ----------------------------------------- */
+        /* Enemy touches player */
 
         if (
             distance <
-            player.radius + enemy.radius
+            player.radius +
+            enemy.radius
         ) {
 
-            player.health -= enemy.damage;
+            player.health -=
+                enemy.damage;
 
             createExplosion(
                 enemy.x,
@@ -509,13 +740,21 @@ function updateEnemies(dt) {
 
             enemies.splice(i, 1);
 
+            /*
+               This enemy has been removed,
+               so it counts toward room completion.
+            */
+
             roomEnemiesDefeated++;
 
-            if (player.health <= 0) {
+            if (
+                player.health <= 0
+            ) {
 
                 player.health = 0;
 
                 endGame();
+
                 return;
             }
         }
@@ -529,11 +768,13 @@ function updateEnemies(dt) {
 
 function killEnemy(index) {
 
-    const enemy = enemies[index];
+    const enemy =
+        enemies[index];
 
-    scrap += Math.floor(
-        Math.random() * 6
-    ) + 5;
+    scrap +=
+        Math.floor(
+            Math.random() * 6
+        ) + 5;
 
     kills++;
 
@@ -549,33 +790,52 @@ function killEnemy(index) {
 
 
 /* =========================================================
-   ROOM PROGRESS
+   PROGRESS
 ========================================================= */
 
 function getRoomProgress() {
 
-    if (roomEnemiesTotal <= 0) {
+    if (
+        roomEnemiesTotal <= 0
+    ) {
         return 0;
     }
 
+    /*
+       IMPORTANT:
+       Progress is based ONLY on enemies
+       that have actually been removed.
+
+       It can never exceed 100%.
+    */
+
     return Math.min(
         100,
-        (roomEnemiesDefeated / roomEnemiesTotal) * 100
+        (
+            roomEnemiesDefeated /
+            roomEnemiesTotal
+        ) * 100
     );
 }
 
 
 function updateProgress() {
 
-    const progress = getRoomProgress();
+    const progress =
+        getRoomProgress();
 
     const fill =
-        document.getElementById("progress-fill");
+        document.getElementById(
+            "progress-fill"
+        );
 
     const text =
-        document.getElementById("progress-text");
+        document.getElementById(
+            "progress-text"
+        );
 
-    fill.style.width = `${progress}%`;
+    fill.style.width =
+        `${progress}%`;
 
     text.textContent =
         `${Math.floor(progress)}%`;
@@ -583,17 +843,28 @@ function updateProgress() {
 
 
 /* =========================================================
-   ROOM COMPLETION
+   ROOM COMPLETE
 ========================================================= */
 
 function checkRoomComplete() {
 
-    if (transitioning || upgradeScreen) {
+    if (
+        transitioning ||
+        upgradeScreen
+    ) {
         return;
     }
 
+    /*
+       BOTH conditions are required.
+
+       This means 100% cannot happen while
+       an enemy is still alive.
+    */
+
     if (
-        roomEnemiesDefeated >= roomEnemiesTotal &&
+        roomEnemiesDefeated >=
+            roomEnemiesTotal &&
         enemies.length === 0
     ) {
 
@@ -602,31 +873,59 @@ function checkRoomComplete() {
 }
 
 
-/* =========================================================
-   COMPLETE ROOM
-========================================================= */
-
 function completeRoom() {
 
     transitioning = true;
 
-    // LOCK progress at exactly 100%
-    document.getElementById("progress-fill").style.width = "100%";
-    document.getElementById("progress-text").textContent = "100%";
+    /*
+       Hard lock at 100%.
+    */
 
-    document.getElementById("room-status").textContent =
+    document
+        .getElementById(
+            "progress-fill"
+        )
+        .style.width = "100%";
+
+    document
+        .getElementById(
+            "progress-text"
+        )
+        .textContent = "100%";
+
+    document
+        .getElementById(
+            "room-status"
+        )
+        .textContent =
         "ROOM CLEARED";
 
-    document.getElementById("clear-screen").classList.remove("hidden");
+    document
+        .getElementById(
+            "clear-screen"
+        )
+        .classList
+        .remove("hidden");
 
-    document.getElementById("clear-message").textContent =
+    document
+        .getElementById(
+            "clear-message"
+        )
+        .textContent =
         `Sector ${depth} cleared.`;
 
     setTimeout(() => {
 
-        document.getElementById("clear-screen").classList.add("hidden");
+        document
+            .getElementById(
+                "clear-screen"
+            )
+            .classList
+            .add("hidden");
 
-        if (depth >= MAX_ROOMS) {
+        if (
+            depth >= MAX_ROOMS
+        ) {
 
             finishRun();
 
@@ -640,7 +939,7 @@ function completeRoom() {
 
 
 /* =========================================================
-   UPGRADE SCREEN
+   UPGRADE SYSTEM
 ========================================================= */
 
 function showUpgradeScreen() {
@@ -648,118 +947,272 @@ function showUpgradeScreen() {
     transitioning = false;
     upgradeScreen = true;
 
-    document.getElementById("upgrade-screen").classList.remove("hidden");
+    document
+        .getElementById(
+            "upgrade-screen"
+        )
+        .classList
+        .remove("hidden");
 
-    generateUpgrades();
+    renderUpgrades();
 }
 
 
-/* =========================================================
-   UPGRADE OPTIONS
-========================================================= */
-
-function generateUpgrades() {
-
-    const upgrades = [
-
-        {
-            title: "REINFORCED CORE",
-
-            description:
-                "+20 Maximum HP",
-
-            apply: () => {
-
-                player.maxHealth += 20;
-                player.health += 20;
-            }
-        },
-
-        {
-            title: "OVERDRIVE",
-
-            description:
-                "+25% Movement Speed",
-
-            apply: () => {
-
-                player.speed *= 1.25;
-            }
-        },
-
-        {
-            title: "AMPLIFIED ROUND",
-
-            description:
-                "+25% Weapon Damage",
-
-            apply: () => {
-
-                player.damage *= 1.25;
-            }
-        }
-    ];
-
-    // Shuffle
-    upgrades.sort(() => Math.random() - 0.5);
+function renderUpgrades() {
 
     const container =
-        document.getElementById("upgrade-options");
+        document.getElementById(
+            "upgrade-options"
+        );
 
     container.innerHTML = "";
 
-    upgrades.forEach(upgrade => {
+    document
+        .getElementById(
+            "upgrade-scrap"
+        )
+        .textContent = scrap;
 
-        const button =
-            document.createElement("button");
+    /*
+       Show 3 random upgrades.
+    */
 
-        button.className = "upgrade-card";
+    const keys =
+        Object.keys(upgrades);
 
-        button.innerHTML = `
+    keys.sort(
+        () => Math.random() - 0.5
+    );
+
+    const selected =
+        keys.slice(0, 3);
+
+    selected.forEach(key => {
+
+        const upgrade =
+            upgrades[key];
+
+        const cost =
+            getUpgradeCost(upgrade);
+
+        const card =
+            document.createElement(
+                "button"
+            );
+
+        card.className =
+            "upgrade-card";
+
+        const currentTier =
+            upgrade.tier;
+
+        card.innerHTML = `
+
+            <div class="upgrade-icon">
+                ${getUpgradeIcon(key)}
+            </div>
+
             <div class="upgrade-title">
-                ${upgrade.title}
+                ${upgrade.name}
+            </div>
+
+            <div class="upgrade-tier">
+                TIER ${currentTier + 1}
             </div>
 
             <div class="upgrade-description">
-                ${upgrade.description}
+                ${upgrade.description(
+                    currentTier
+                )}
             </div>
+
+            <div class="upgrade-cost">
+                ${cost} SCRAP
+            </div>
+
         `;
 
-        button.addEventListener("click", () => {
+        card.addEventListener(
+            "click",
+            () => {
 
-            upgrade.apply();
+                buyUpgrade(key);
+            }
+        );
 
-            chooseUpgrade();
-        });
-
-        container.appendChild(button);
+        container.appendChild(card);
     });
 }
 
 
 /* =========================================================
-   CHOOSE UPGRADE
+   UPGRADE ICONS
 ========================================================= */
 
-function chooseUpgrade() {
+function getUpgradeIcon(key) {
 
-    upgradeScreen = false;
+    const icons = {
 
-    document
-        .getElementById("upgrade-screen")
-        .classList.add("hidden");
+        health: "◉",
 
-    depth++;
+        speed: "»",
 
-    player.x = canvas.width / 2;
-    player.y = canvas.height / 2;
+        damage: "✦",
 
-    startRoom();
+        fireRate: "≋",
+
+        bulletSpeed: "➜",
+
+        multishot: "✣"
+    };
+
+    return icons[key] || "◆";
 }
 
 
 /* =========================================================
-   RUN COMPLETE
+   BUY UPGRADE
+========================================================= */
+
+function buyUpgrade(key) {
+
+    const upgrade =
+        upgrades[key];
+
+    const cost =
+        getUpgradeCost(upgrade);
+
+    if (scrap < cost) {
+
+        return;
+    }
+
+    /*
+       Pay the scrap.
+    */
+
+    scrap -= cost;
+
+    /*
+       Increase tier.
+    */
+
+    upgrade.tier++;
+
+    /*
+       Apply the new tier.
+    */
+
+    applyUpgrade(key);
+
+    /*
+       Refresh the cards so the
+       player can buy another upgrade
+       if they have enough scrap.
+    */
+
+    renderUpgrades();
+
+    updateHUD();
+}
+
+
+/* =========================================================
+   APPLY UPGRADE
+========================================================= */
+
+function applyUpgrade(key) {
+
+    switch (key) {
+
+        case "health":
+
+            player.maxHealth *= 1.20;
+
+            player.health =
+                player.maxHealth;
+
+            break;
+
+
+        case "speed":
+
+            player.speed *= 1.10;
+
+            break;
+
+
+        case "damage":
+
+            player.damage *= 1.15;
+
+            break;
+
+
+        case "fireRate":
+
+            /*
+               Smaller cooldown =
+               faster shooting.
+            */
+
+            player.fireRate *= 0.90;
+
+            break;
+
+
+        case "bulletSpeed":
+
+            player.bulletSpeed *= 1.15;
+
+            break;
+
+
+        case "multishot":
+
+            player.multishot++;
+
+            break;
+    }
+}
+
+
+/* =========================================================
+   CONTINUE
+========================================================= */
+
+document
+    .getElementById(
+        "continue-button"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            upgradeScreen = false;
+
+            document
+                .getElementById(
+                    "upgrade-screen"
+                )
+                .classList
+                .add("hidden");
+
+            depth++;
+
+            player.x =
+                canvas.width / 2;
+
+            player.y =
+                canvas.height / 2;
+
+            startRoom();
+        }
+    );
+
+
+/* =========================================================
+   FINAL RUN
 ========================================================= */
 
 function finishRun() {
@@ -767,16 +1220,31 @@ function finishRun() {
     gameRunning = false;
 
     document
-        .getElementById("clear-screen")
-        .classList.remove("hidden");
+        .getElementById(
+            "clear-screen"
+        )
+        .classList
+        .remove("hidden");
 
-    document.getElementById("clear-title").textContent =
+    document
+        .getElementById(
+            "clear-title"
+        )
+        .textContent =
         "VOID CONQUERED";
 
-    document.getElementById("clear-message").textContent =
+    document
+        .getElementById(
+            "clear-message"
+        )
+        .textContent =
         `You survived all ${MAX_ROOMS} rooms.`;
 
-    document.getElementById("room-status").textContent =
+    document
+        .getElementById(
+            "room-status"
+        )
+        .textContent =
         "RUN COMPLETE";
 }
 
@@ -790,17 +1258,29 @@ function endGame() {
     gameRunning = false;
 
     document
-        .getElementById("death-screen")
-        .classList.remove("hidden");
+        .getElementById(
+            "death-screen"
+        )
+        .classList
+        .remove("hidden");
 
-    document.getElementById("death-depth").textContent =
-        depth;
+    document
+        .getElementById(
+            "death-depth"
+        )
+        .textContent = depth;
 
-    document.getElementById("death-scrap").textContent =
-        scrap;
+    document
+        .getElementById(
+            "death-scrap"
+        )
+        .textContent = scrap;
 
-    document.getElementById("death-kills").textContent =
-        kills;
+    document
+        .getElementById(
+            "death-kills"
+        )
+        .textContent = kills;
 }
 
 
@@ -814,8 +1294,15 @@ function createMuzzleFlash() {
 
         particles.push({
 
-            x: player.x + Math.cos(player.angle) * 22,
-            y: player.y + Math.sin(player.angle) * 22,
+            x:
+                player.x +
+                Math.cos(player.angle) *
+                22,
+
+            y:
+                player.y +
+                Math.sin(player.angle) *
+                22,
 
             vx:
                 Math.cos(player.angle) *
@@ -826,7 +1313,6 @@ function createMuzzleFlash() {
                 (100 + Math.random() * 100),
 
             life: 0.15,
-
             maxLife: 0.15,
 
             radius: 3
@@ -840,18 +1326,22 @@ function createHitParticles(x, y) {
     for (let i = 0; i < 5; i++) {
 
         const angle =
-            Math.random() * Math.PI * 2;
+            Math.random() *
+            Math.PI *
+            2;
 
         particles.push({
 
             x,
             y,
 
-            vx: Math.cos(angle) * 80,
-            vy: Math.sin(angle) * 80,
+            vx:
+                Math.cos(angle) * 80,
+
+            vy:
+                Math.sin(angle) * 80,
 
             life: 0.25,
-
             maxLife: 0.25,
 
             radius: 2
@@ -865,24 +1355,33 @@ function createExplosion(x, y) {
     for (let i = 0; i < 15; i++) {
 
         const angle =
-            Math.random() * Math.PI * 2;
+            Math.random() *
+            Math.PI *
+            2;
 
         const speed =
-            50 + Math.random() * 150;
+            50 +
+            Math.random() * 150;
 
         particles.push({
 
             x,
             y,
 
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
+            vx:
+                Math.cos(angle) *
+                speed,
+
+            vy:
+                Math.sin(angle) *
+                speed,
 
             life: 0.5,
-
             maxLife: 0.5,
 
-            radius: 2 + Math.random() * 3
+            radius:
+                2 +
+                Math.random() * 3
         });
     }
 }
@@ -890,16 +1389,26 @@ function createExplosion(x, y) {
 
 function updateParticles(dt) {
 
-    for (let i = particles.length - 1; i >= 0; i--) {
+    for (
+        let i = particles.length - 1;
+        i >= 0;
+        i--
+    ) {
 
-        const particle = particles[i];
+        const particle =
+            particles[i];
 
-        particle.x += particle.vx * dt;
-        particle.y += particle.vy * dt;
+        particle.x +=
+            particle.vx * dt;
+
+        particle.y +=
+            particle.vy * dt;
 
         particle.life -= dt;
 
-        if (particle.life <= 0) {
+        if (
+            particle.life <= 0
+        ) {
 
             particles.splice(i, 1);
         }
@@ -913,22 +1422,33 @@ function updateParticles(dt) {
 
 function updateHUD() {
 
-    document.getElementById("depth").textContent =
-        depth;
+    document
+        .getElementById("depth")
+        .textContent = depth;
 
-    document.getElementById("scrap").textContent =
-        scrap;
+    document
+        .getElementById("scrap")
+        .textContent = scrap;
 
-    document.getElementById("health-text").textContent =
-        `${Math.ceil(player.health)} / ${player.maxHealth}`;
+    document
+        .getElementById("health-text")
+        .textContent =
+        `${Math.ceil(player.health)} / ${Math.ceil(player.maxHealth)}`;
 
     const healthPercent =
         Math.max(
             0,
-            (player.health / player.maxHealth) * 100
+            (
+                player.health /
+                player.maxHealth
+            ) * 100
         );
 
-    document.getElementById("health-fill").style.width =
+    document
+        .getElementById(
+            "health-fill"
+        )
+        .style.width =
         `${healthPercent}%`;
 
     updateProgress();
@@ -948,6 +1468,7 @@ function draw() {
         canvas.height
     );
 
+
     /* Background */
 
     const gradient =
@@ -955,15 +1476,24 @@ function draw() {
             canvas.width / 2,
             canvas.height / 2,
             100,
+
             canvas.width / 2,
             canvas.height / 2,
             canvas.width
         );
 
-    gradient.addColorStop(0, "#0b1b2d");
-    gradient.addColorStop(1, "#03060b");
+    gradient.addColorStop(
+        0,
+        "#0b1b2d"
+    );
 
-    ctx.fillStyle = gradient;
+    gradient.addColorStop(
+        1,
+        "#03060b"
+    );
+
+    ctx.fillStyle =
+        gradient;
 
     ctx.fillRect(
         0,
@@ -991,7 +1521,11 @@ function draw() {
         ctx.beginPath();
 
         ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
+
+        ctx.lineTo(
+            x,
+            canvas.height
+        );
 
         ctx.stroke();
     }
@@ -1005,7 +1539,11 @@ function draw() {
         ctx.beginPath();
 
         ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+
+        ctx.lineTo(
+            canvas.width,
+            y
+        );
 
         ctx.stroke();
     }
@@ -1025,7 +1563,8 @@ function draw() {
             Math.PI * 2
         );
 
-        ctx.fillStyle = "#72d7ff";
+        ctx.fillStyle =
+            "#72d7ff";
 
         ctx.fill();
     }
@@ -1045,15 +1584,17 @@ function draw() {
             Math.PI * 2
         );
 
-        ctx.fillStyle = "#ff5577";
+        ctx.fillStyle =
+            "#ff5577";
 
         ctx.fill();
 
 
-        /* Enemy health */
+        /* Enemy health bar */
 
         const healthPercent =
-            enemy.health / enemy.maxHealth;
+            enemy.health /
+            enemy.maxHealth;
 
         ctx.fillStyle =
             "rgba(255,255,255,0.15)";
@@ -1065,18 +1606,25 @@ function draw() {
             4
         );
 
-        ctx.fillStyle = "#ff5577";
+        ctx.fillStyle =
+            "#ff5577";
 
         ctx.fillRect(
             enemy.x - 20,
             enemy.y - 27,
-            40 * healthPercent,
+            40 *
+                Math.max(
+                    0,
+                    healthPercent
+                ),
             4
         );
     }
 
 
-    /* Player */
+    /* =====================================================
+       PLAYER — CIRCULAR CORE
+    ===================================================== */
 
     ctx.save();
 
@@ -1085,20 +1633,83 @@ function draw() {
         player.y
     );
 
-    ctx.rotate(player.angle);
+
+    /* Outer glow */
 
     ctx.beginPath();
 
-    ctx.moveTo(21, 0);
-    ctx.lineTo(-12, -11);
-    ctx.lineTo(-7, 0);
-    ctx.lineTo(-12, 11);
+    ctx.arc(
+        0,
+        0,
+        player.radius + 7,
+        0,
+        Math.PI * 2
+    );
 
-    ctx.closePath();
-
-    ctx.fillStyle = "#72d7ff";
+    ctx.fillStyle =
+        "rgba(114,215,255,0.08)";
 
     ctx.fill();
+
+
+    /* Outer ring */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        player.radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.strokeStyle =
+        "#72d7ff";
+
+    ctx.lineWidth = 3;
+
+    ctx.stroke();
+
+
+    /* Inner core */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        7,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle =
+        "#72d7ff";
+
+    ctx.fill();
+
+
+    /* Aim indicator */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        Math.cos(player.angle) * 9,
+        Math.sin(player.angle) * 9
+    );
+
+    ctx.lineTo(
+        Math.cos(player.angle) * 22,
+        Math.sin(player.angle) * 22
+    );
+
+    ctx.strokeStyle =
+        "#72d7ff";
+
+    ctx.lineWidth = 3;
+
+    ctx.stroke();
 
     ctx.restore();
 
@@ -1108,9 +1719,11 @@ function draw() {
     for (const particle of particles) {
 
         const alpha =
-            particle.life / particle.maxLife;
+            particle.life /
+            particle.maxLife;
 
-        ctx.globalAlpha = alpha;
+        ctx.globalAlpha =
+            alpha;
 
         ctx.beginPath();
 
@@ -1122,7 +1735,8 @@ function draw() {
             Math.PI * 2
         );
 
-        ctx.fillStyle = "#72d7ff";
+        ctx.fillStyle =
+            "#72d7ff";
 
         ctx.fill();
     }
@@ -1135,14 +1749,23 @@ function draw() {
    RESIZE
 ========================================================= */
 
-window.addEventListener("resize", () => {
+window.addEventListener(
+    "resize",
+    () => {
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+        canvas.width =
+            window.innerWidth;
 
-    player.x = canvas.width / 2;
-    player.y = canvas.height / 2;
-});
+        canvas.height =
+            window.innerHeight;
+
+        player.x =
+            canvas.width / 2;
+
+        player.y =
+            canvas.height / 2;
+    }
+);
 
 
 /* =========================================================
@@ -1150,9 +1773,20 @@ window.addEventListener("resize", () => {
 ========================================================= */
 
 document
-    .getElementById("start-button")
-    .addEventListener("click", startGame);
+    .getElementById(
+        "start-button"
+    )
+    .addEventListener(
+        "click",
+        startGame
+    );
+
 
 document
-    .getElementById("restart-button")
-    .addEventListener("click", startGame);
+    .getElementById(
+        "restart-button"
+    )
+    .addEventListener(
+        "click",
+        startGame
+    );
