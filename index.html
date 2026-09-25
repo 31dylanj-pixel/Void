@@ -21,120 +21,173 @@
 
 <body>
 
-    <main id="game-container">
+<main id="game-container">
 
-        <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas"></canvas>
 
-        <!-- HUD -->
-        <div id="hud">
+    <!-- ================= HUD ================= -->
 
-            <div class="hud-left">
+    <div id="hud">
 
-                <div class="stat">
-                    <span class="label">DEPTH</span>
-                    <span id="depth">01</span>
-                </div>
+        <div class="hud-left">
 
-                <div class="stat">
-                    <span class="label">SCRAP</span>
-                    <span id="scrap">0</span>
-                </div>
-
+            <div class="stat">
+                <span class="label">DEPTH</span>
+                <span id="depth">01</span>
             </div>
 
-            <div class="hud-center">
-                <div id="room-status">ROOM 01</div>
+            <div class="stat">
+                <span class="label">SCRAP</span>
+                <span id="scrap">0</span>
             </div>
 
-            <div class="hud-right">
+        </div>
 
-                <div class="health-container">
-                    <div class="health-label">
-                        <span>HP</span>
-                        <span id="health-text">100 / 100</span>
-                    </div>
 
-                    <div class="health-bar">
-                        <div id="health-fill"></div>
-                    </div>
+        <div class="hud-center">
+
+            <div id="room-status">
+                ROOM 01
+            </div>
+
+            <div class="progress-wrapper">
+
+                <div class="progress-label">
+                    <span>ROOM PROGRESS</span>
+                    <span id="progress-text">0%</span>
+                </div>
+
+                <div class="progress-bar">
+                    <div id="progress-fill"></div>
                 </div>
 
             </div>
 
         </div>
 
-        <!-- Crosshair -->
-        <div id="crosshair">
-            <div class="crosshair-line horizontal"></div>
-            <div class="crosshair-line vertical"></div>
+
+        <div class="hud-right">
+
+            <div class="health-container">
+
+                <div class="health-label">
+                    <span>HP</span>
+                    <span id="health-text">100 / 100</span>
+                </div>
+
+                <div class="health-bar">
+                    <div id="health-fill"></div>
+                </div>
+
+            </div>
+
         </div>
 
-        <!-- Start Screen -->
-        <section id="start-screen" class="overlay">
+    </div>
 
-            <div class="title-container">
 
-                <div class="subtitle">UNKNOWN FACILITY</div>
+    <!-- ================= CROSSHAIR ================= -->
 
-                <h1>VOID</h1>
+    <div id="crosshair">
+        <div class="crosshair-line horizontal"></div>
+        <div class="crosshair-line vertical"></div>
+    </div>
 
-                <p>
-                    Something is waiting at the bottom.
-                </p>
 
-                <button id="start-button">
-                    ENTER THE VOID
-                </button>
+    <!-- ================= START SCREEN ================= -->
 
-                <div class="controls">
-                    <span><b>W A S D</b> MOVE</span>
-                    <span><b>MOUSE</b> AIM</span>
-                    <span><b>CLICK</b> FIRE</span>
+    <section id="start-screen" class="overlay">
+
+        <div class="title-container">
+
+            <div class="subtitle">
+                UNKNOWN FACILITY
+            </div>
+
+            <h1>VOID</h1>
+
+            <p>
+                Something is waiting at the bottom.
+            </p>
+
+            <button id="start-button">
+                ENTER THE VOID
+            </button>
+
+            <div class="controls">
+                <span><b>W A S D</b> MOVE</span>
+                <span><b>MOUSE</b> AIM</span>
+                <span><b>CLICK</b> FIRE</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= DEATH SCREEN ================= -->
+
+    <section id="death-screen" class="overlay hidden">
+
+        <div class="death-container">
+
+            <div class="subtitle">
+                SIGNAL LOST
+            </div>
+
+            <h2>YOU DIED</h2>
+
+            <div class="run-stats">
+
+                <div>
+                    <span>DEPTH</span>
+                    <strong id="final-depth">01</strong>
+                </div>
+
+                <div>
+                    <span>SCRAP</span>
+                    <strong id="final-scrap">0</strong>
+                </div>
+
+                <div>
+                    <span>ENEMIES</span>
+                    <strong id="final-kills">0</strong>
                 </div>
 
             </div>
 
-        </section>
+            <button id="restart-button">
+                TRY AGAIN
+            </button>
 
-        <!-- Death Screen -->
-        <section id="death-screen" class="overlay hidden">
+        </div>
 
-            <div class="death-container">
+    </section>
 
-                <div class="subtitle">SIGNAL LOST</div>
 
-                <h2>YOU DIED</h2>
+    <!-- ================= ROOM CLEAR ================= -->
 
-                <div class="run-stats">
+    <section id="room-clear" class="overlay hidden">
 
-                    <div>
-                        <span>DEPTH</span>
-                        <strong id="final-depth">01</strong>
-                    </div>
+        <div class="clear-container">
 
-                    <div>
-                        <span>SCRAP</span>
-                        <strong id="final-scrap">0</strong>
-                    </div>
-
-                    <div>
-                        <span>ENEMIES</span>
-                        <strong id="final-kills">0</strong>
-                    </div>
-
-                </div>
-
-                <button id="restart-button">
-                    TRY AGAIN
-                </button>
-
+            <div class="subtitle">
+                SECTOR CLEARED
             </div>
 
-        </section>
+            <h2>ROOM COMPLETE</h2>
 
-    </main>
+            <p id="clear-message">
+                Preparing next sector...
+            </p>
 
-    <script src="game.js"></script>
+        </div>
+
+    </section>
+
+</main>
+
+<script src="game.js"></script>
 
 </body>
 </html>
