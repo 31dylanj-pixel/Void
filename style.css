@@ -858,6 +858,135 @@ button:active {
 }
 
 /* =========================================================
+   ROOM TRANSITION
+========================================================= */
+
+.room-transition {
+    position: fixed;
+    inset: 0;
+
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(20, 55, 85, 0.35),
+            rgba(5, 9, 18, 0.98) 65%
+        );
+
+    backdrop-filter: blur(12px);
+
+    opacity: 1;
+
+    transition:
+        opacity 0.45s ease;
+}
+
+
+.room-transition-hide {
+    opacity: 0;
+}
+
+
+.room-transition-inner {
+    text-align: center;
+
+    animation:
+        roomAppear 0.7s ease;
+}
+
+
+.room-transition .subtitle {
+    margin-bottom: 12px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 12px;
+
+    letter-spacing: 0.28em;
+
+    color: #71809a;
+}
+
+
+.room-transition h1 {
+    margin: 0;
+
+    font-family: "Montserrat", sans-serif;
+
+    font-size: clamp(48px, 8vw, 100px);
+
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+    color: #eef5ff;
+
+    text-shadow:
+        0 0 25px rgba(114, 215, 255, 0.35);
+}
+
+
+.room-line {
+    width: 180px;
+    height: 2px;
+
+    margin: 22px auto 0;
+
+    background: #72d7ff;
+
+    box-shadow:
+        0 0 18px rgba(114, 215, 255, 0.65);
+}
+
+
+@keyframes roomAppear {
+
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+}
+
+/* =========================================================
+   ENEMY COUNTER
+========================================================= */
+
+.enemy-counter {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 13px;
+
+    letter-spacing: 0.14em;
+
+    color: #ff5577;
+
+    padding: 9px 14px;
+
+    border: 1px solid rgba(255, 85, 119, 0.22);
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 85, 119, 0.06);
+
+    box-shadow:
+        inset 0 0 20px rgba(255, 85, 119, 0.025);
+
+}
+
+/* =========================================================
    RESPONSIVE
 ========================================================= */
 
