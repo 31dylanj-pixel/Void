@@ -31,18 +31,132 @@ const MAX_ROOMS = 10;
     spawn and be defeated to clear each room.
 */
 const ROOM_ENEMIES = [
-    12,
-    18,
-    25,
-    32,
-    40,
-    50,
-    65,
-    80,
-    100,
-    125
+    22,
+    28,
+    35,
+    42,
+    52,
+    62,
+    75,
+    90,
+    110,
+    135
 ];
 
+/* =========================================================
+   ENEMY TYPES
+========================================================= */
+
+const ENEMY_TYPES = {
+
+    crawler: {
+        name: "CRAWLER",
+        color: "#ff5577",
+        radius: 15,
+
+        health: depth =>
+            45 + depth * 12,
+
+        speed: depth =>
+            70 + depth * 8,
+
+        damage: depth =>
+            15 + depth * 2,
+
+        ability: "NONE"
+    },
+
+
+    splitter: {
+        name: "SPLITTER",
+        color: "#ff8a3d",
+        radius: 45,
+
+        health: depth =>
+            260 + depth * 28,
+
+        speed: depth =>
+            48 + depth * 4,
+
+        damage: depth =>
+            25 + depth * 2,
+
+        ability: "SPLITS INTO 5 CRAWLERS"
+    },
+
+
+    gunner: {
+        name: "GUNNER",
+        color: "#b8ff3d",
+        radius: 22.5,
+
+        health: depth =>
+            180 + depth * 20,
+
+        speed: depth =>
+            52 + depth * 5,
+
+        damage: depth =>
+            20 + depth * 2,
+
+        ability: "MOUNTED BARREL"
+    },
+
+
+    voidling: {
+        name: "VOIDLING",
+        color: "#a855f7",
+        radius: 37.5,
+
+        health: depth =>
+            360 + depth * 35,
+
+        speed: depth =>
+            42 + depth * 4,
+
+        damage: depth =>
+            28 + depth * 2,
+
+        ability: "VOID RING + TURRET"
+    },
+
+
+    stalker: {
+        name: "STALKER",
+        color: "#ffe44d",
+        radius: 30,
+
+        health: depth =>
+            250 + depth * 25,
+
+        speed: depth =>
+            (70 + depth * 8) * 2,
+
+        damage: depth =>
+            22 + depth * 2,
+
+        ability: "2× CRAWLER SPEED"
+    },
+
+
+    boss: {
+        name: "VOID TITAN",
+        color: "#e8f4ff",
+        radius: 90,
+
+        health: depth =>
+            6500,
+
+        speed: depth =>
+            34,
+
+        damage: depth =>
+            45,
+
+        ability: "VOID RING + 8 TURRETS"
+    }
+
+};
 
 /* =========================================================
    GAME STATE
@@ -214,9 +328,96 @@ const upgrades = {
 ========================================================= */
 
 let bullets = [];
+let enemyBullets = [];
 let enemies = [];
 let particles = [];
 
+/* =========================================================
+   ENEMY PROJECTILES
+========================================================= */
+
+function fireEnemyBullet(x, y, angle, speed = 260, damage = 8) {
+
+    enemyBullets.push({
+
+        x,
+        y,
+
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+
+        radius: 5,
+
+        damage
+
+    });
+
+}
+
+
+function updateEnemyBullets(dt) {
+
+    for (
+        let i = enemyBullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet = enemyBullets[i];
+
+        bullet.x += bullet.vx * dt;
+        bullet.y += bullet.vy * dt;
+
+        const dx =
+            player.x - bullet.x;
+
+        const dy =
+            player.y - bullet.y;
+
+        const distance =
+            Math.sqrt(dx * dx + dy * dy);
+
+        if (
+            distance <
+            player.radius +
+            bullet.radius
+        ) {
+
+            player.health -=
+                bullet.damage;
+
+            createHitParticles(
+                bullet.x,
+                bullet.y
+            );
+
+            enemyBullets.splice(i, 1);
+
+            if (player.health <= 0) {
+
+                player.health = 0;
+
+                finishGame();
+
+                return;
+            }
+
+            continue;
+        }
+
+        const margin = 150;
+
+        if (
+            bullet.x < -margin ||
+            bullet.x > canvas.width + margin ||
+            bullet.y < -margin ||
+            bullet.y > canvas.height + margin
+        ) {
+
+            enemyBullets.splice(i, 1);
+        }
+    }
+}
 
 /* =========================================================
    DOM
@@ -264,6 +465,46 @@ restartButton.addEventListener("click", () => {
    ROOM TRANSITION
 ========================================================= */
 
+const enemyIntroductions = {
+
+    3: {
+        type: "splitter",
+        title: "NEW THREAT",
+        health: "260+",
+        ability: "Splits into 5 Crawlers on death."
+    },
+
+    5: {
+        type: "gunner",
+        title: "NEW THREAT",
+        health: "180+",
+        ability: "Mounted barrel fires directly at you."
+    },
+
+    7: {
+        type: "voidling",
+        title: "NEW THREAT",
+        health: "360+",
+        ability: "Damaging Void Ring + turret."
+    },
+
+    9: {
+        type: "stalker",
+        title: "NEW THREAT",
+        health: "250+",
+        ability: "Moves at 2× Crawler speed."
+    },
+
+    10: {
+        type: "boss",
+        title: "CRITICAL THREAT",
+        health: "6,500",
+        ability: "Void Ring + 8 rapid-fire turrets."
+    }
+
+};
+
+
 function showRoomTransition(roomNumber) {
 
     transitioning = true;
@@ -271,31 +512,140 @@ function showRoomTransition(roomNumber) {
 
     crosshair.style.display = "none";
 
-    const overlay = document.createElement("section");
+    const introduction =
+        enemyIntroductions[
+            roomNumber
+        ];
 
-    overlay.className = "room-transition";
+    const overlay =
+        document.createElement("section");
 
-    overlay.innerHTML = `
-        <div class="room-transition-inner">
+    overlay.className =
+        "room-transition";
 
-            <div class="subtitle">
-                DESCENDING
+
+    if (introduction) {
+
+        const data =
+            ENEMY_TYPES[
+                introduction.type
+            ];
+
+        overlay.innerHTML = `
+
+            <div class="room-transition-inner enemy-intro">
+
+                <div class="subtitle">
+                    DESCENDING
+                </div>
+
+                <h1>
+                    ROOM ${String(roomNumber).padStart(2, "0")}
+                </h1>
+
+                <div class="room-line"></div>
+
+                <div class="enemy-intro-card">
+
+                    <div class="enemy-intro-label">
+                        ${introduction.title}
+                    </div>
+
+                    <div
+                        class="enemy-preview"
+                        style="
+                            --enemy-color:
+                            ${data.color};
+                            --enemy-size:
+                            ${Math.min(
+                                data.radius,
+                                58
+                            )}px;
+                        "
+                    >
+                        <div class="enemy-preview-core"></div>
+                    </div>
+
+                    <div class="enemy-intro-name">
+                        ${data.name}
+                    </div>
+
+                    <div class="enemy-intro-stats">
+
+                        <div>
+                            <span>HEALTH</span>
+                            <strong>
+                                ${introduction.health}
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>SIZE</span>
+                            <strong>
+                                ${Math.round(
+                                    data.radius / 15
+                                )}×
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <div class="enemy-intro-ability">
+                        ${introduction.ability}
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+    } else {
+
+        overlay.innerHTML = `
+
+            <div class="room-transition-inner">
+
+                <div class="subtitle">
+                    DESCENDING
+                </div>
+
+                <h1>
+                    ROOM ${String(roomNumber).padStart(2, "0")}
+                </h1>
+
+                <div class="room-line"></div>
+
             </div>
 
-            <h1>
-                ROOM ${roomNumber}
-            </h1>
+        `;
+    }
 
-            <div class="room-line"></div>
 
-        </div>
-    `;
+    document.body.appendChild(
+        overlay
+    );
 
-    document.body.appendChild(overlay);
+
+    /*
+        Normal room:
+        1 second.
+
+        New enemy:
+        2.7 seconds so the player
+        actually has time to read it.
+    */
+
+    const displayTime =
+        introduction
+            ? 2700
+            : 1000;
+
 
     setTimeout(() => {
 
-        overlay.classList.add("room-transition-hide");
+        overlay.classList.add(
+            "room-transition-hide"
+        );
 
         setTimeout(() => {
 
@@ -303,13 +653,14 @@ function showRoomTransition(roomNumber) {
 
             transitioning = false;
 
-            beginRoom(roomNumber);
+            beginRoom(
+                roomNumber
+            );
 
         }, 450);
 
-    }, 1000);
+    }, displayTime);
 }
-
 
 /* =========================================================
    START GAME
@@ -338,6 +689,7 @@ function startGame() {
     player.shootCooldown = 0;
 
     bullets = [];
+    enemyBullets = [];
     enemies = [];
     particles = [];
 
@@ -376,6 +728,7 @@ function beginRoom(roomNumber) {
 
     enemies = [];
     bullets = [];
+    enemyBullets = [];
     particles = [];
 
     spawnTimer = 0;
@@ -476,21 +829,139 @@ function getSpawnDelay() {
 
 
 /* =========================================================
+   ENEMY SELECTION
+========================================================= */
+
+function getEnemyTypeForRoom() {
+
+    /*
+        Room 10 is the boss room.
+    */
+
+    if (depth === 10) {
+
+        if (roomSpawned === 0) {
+            return "boss";
+        }
+
+        return "crawler";
+    }
+
+
+    const roll = Math.random();
+
+
+    /* Rooms 1–2 */
+
+    if (depth < 3) {
+        return "crawler";
+    }
+
+
+    /* Room 3–4 */
+
+    if (depth < 5) {
+
+        return roll < 0.20
+            ? "splitter"
+            : "crawler";
+    }
+
+
+    /* Room 5–6 */
+
+    if (depth < 7) {
+
+        if (roll < 0.12) {
+            return "gunner";
+        }
+
+        if (roll < 0.27) {
+            return "splitter";
+        }
+
+        return "crawler";
+    }
+
+
+    /* Room 7–8 */
+
+    if (depth < 9) {
+
+        if (roll < 0.08) {
+            return "voidling";
+        }
+
+        if (roll < 0.20) {
+            return "gunner";
+        }
+
+        if (roll < 0.35) {
+            return "splitter";
+        }
+
+        return "crawler";
+    }
+
+
+    /* Room 9 */
+
+    if (depth === 9) {
+
+        if (roll < 0.10) {
+            return "stalker";
+        }
+
+        if (roll < 0.18) {
+            return "voidling";
+        }
+
+        if (roll < 0.30) {
+            return "gunner";
+        }
+
+        if (roll < 0.43) {
+            return "splitter";
+        }
+
+        return "crawler";
+    }
+
+
+    return "crawler";
+}
+
+
+/* =========================================================
    SPAWN ENEMY
 ========================================================= */
 
 function spawnEnemy() {
 
-    if (roomSpawned >= roomEnemiesRequired) {
+    if (
+        roomSpawned >=
+        roomEnemiesRequired
+    ) {
         return;
     }
 
-    if (enemies.length >= getEnemyCap()) {
+    if (
+        enemies.length >=
+        getEnemyCap()
+    ) {
         return;
     }
+
+    const type =
+        getEnemyTypeForRoom();
+
+    const data =
+        ENEMY_TYPES[type];
 
     const angle =
-        Math.random() * Math.PI * 2;
+        Math.random() *
+        Math.PI *
+        2;
 
     const worldScale =
         getWorldScale();
@@ -517,31 +988,48 @@ function spawnEnemy() {
         spawnDistance;
 
     const health =
-        45 +
-        depth * 12;
+        data.health(depth);
 
-    const speed =
-        70 +
-        depth * 8;
+    const enemy = {
 
-    const damage =
-        15 +
-        depth * 2;
-
-    enemies.push({
+        type,
 
         x,
         y,
 
-        radius: 15,
+        radius:
+            data.radius,
 
         health,
-        maxHealth: health,
 
-        speed,
-        damage
+        maxHealth:
+            health,
 
-    });
+        speed:
+            data.speed(depth),
+
+        damage:
+            data.damage(depth),
+
+        shootCooldown:
+            type === "boss"
+                ? 0
+                : Math.random(),
+
+        ringCooldown: 0,
+
+        turretAngles:
+            type === "boss"
+                ? Array.from(
+                    { length: 8 },
+                    (_, i) =>
+                        i *
+                        (Math.PI * 2 / 8)
+                )
+                : null
+    };
+
+    enemies.push(enemy);
 
     roomSpawned++;
 }
@@ -741,6 +1229,189 @@ function updateBullets(dt) {
     }
 }
 
+/* =========================================================
+   ENEMY ABILITIES
+========================================================= */
+
+function updateEnemyWeapons(enemy, dt) {
+
+    /*
+        GUNNER / VOIDLING
+        One turret barrel.
+    */
+
+    if (
+        enemy.type === "gunner" ||
+        enemy.type === "voidling"
+    ) {
+
+        enemy.shootCooldown -= dt;
+
+        if (enemy.shootCooldown <= 0) {
+
+            const angle =
+                Math.atan2(
+                    player.y - enemy.y,
+                    player.x - enemy.x
+                );
+
+            fireEnemyBullet(
+                enemy.x,
+                enemy.y,
+                angle,
+                260,
+                8
+            );
+
+            enemy.shootCooldown =
+                1.15;
+        }
+    }
+
+
+    /*
+        VOIDLING RING
+    */
+
+    if (enemy.type === "voidling") {
+
+        enemy.ringCooldown -= dt;
+
+        if (enemy.ringCooldown <= 0) {
+
+            enemy.ringCooldown = 0.35;
+
+            const dx =
+                player.x - enemy.x;
+
+            const dy =
+                player.y - enemy.y;
+
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                );
+
+            const ringRadius =
+                enemy.radius * 2.2;
+
+            if (
+                distance <
+                ringRadius
+            ) {
+
+                player.health -= 7;
+
+                if (player.health <= 0) {
+
+                    player.health = 0;
+
+                    finishGame();
+                }
+            }
+        }
+    }
+
+
+    /*
+        VOID TITAN
+        Eight independently aimed turrets.
+    */
+
+    if (enemy.type === "boss") {
+
+        enemy.shootCooldown -= dt;
+
+        if (enemy.shootCooldown <= 0) {
+
+            for (
+                let i = 0;
+                i < 8;
+                i++
+            ) {
+
+                const turretAngle =
+                    Math.atan2(
+                        player.y - enemy.y,
+                        player.x - enemy.x
+                    ) +
+                    (i - 3.5) * 0.075;
+
+                const turretDistance =
+                    enemy.radius * 0.62;
+
+                const turretX =
+                    enemy.x +
+                    Math.cos(turretAngle) *
+                    turretDistance;
+
+                const turretY =
+                    enemy.y +
+                    Math.sin(turretAngle) *
+                    turretDistance;
+
+                fireEnemyBullet(
+                    turretX,
+                    turretY,
+                    turretAngle,
+                    300,
+                    9
+                );
+            }
+
+            /*
+                Base player fire rate:
+                0.16 seconds.
+            */
+
+            enemy.shootCooldown =
+                0.16;
+        }
+
+
+        /*
+            Boss Void Ring
+        */
+
+        enemy.ringCooldown -= dt;
+
+        if (enemy.ringCooldown <= 0) {
+
+            enemy.ringCooldown = 0.30;
+
+            const dx =
+                player.x - enemy.x;
+
+            const dy =
+                player.y - enemy.y;
+
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                );
+
+            const ringRadius =
+                enemy.radius * 2.2;
+
+            if (
+                distance <
+                ringRadius
+            ) {
+
+                player.health -= 12;
+
+                if (player.health <= 0) {
+
+                    player.health = 0;
+
+                    finishGame();
+                }
+            }
+        }
+    }
+}
 
 /* =========================================================
    ENEMY UPDATE
@@ -763,7 +1434,15 @@ function updateEnemies(dt) {
             player.y - enemy.y;
 
         const distance =
-            Math.sqrt(dx * dx + dy * dy);
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+
+        /*
+            Move toward player.
+        */
 
         if (distance > 0) {
 
@@ -778,36 +1457,69 @@ function updateEnemies(dt) {
                 dt;
         }
 
+
         /*
-            Contact with player does NOT count
-            as a kill.
+            Special abilities.
         */
 
+        updateEnemyWeapons(
+            enemy,
+            dt
+        );
+
+
+        /*
+            Contact damage.
+        */
+
+        const newDistance =
+            Math.sqrt(
+                Math.pow(
+                    player.x - enemy.x,
+                    2
+                ) +
+                Math.pow(
+                    player.y - enemy.y,
+                    2
+                )
+            );
+
         if (
-             distance <
-             player.radius +
-             enemy.radius
-         ) {
-             player.health -= enemy.damage * dt;
-         
-             const knockback = 120 * dt;
-         
-             enemy.x -=
-                 (dx / distance) *
-                 knockback;
-         
-             enemy.y -=
-                 (dy / distance) *
-                 knockback;
-         
-             if (player.health <= 0) {
-                 player.health = 0;
-                 finishGame();
-             }
-         }
+            newDistance <
+            player.radius +
+            enemy.radius
+        ) {
+
+            player.health -=
+                enemy.damage * dt;
+
+            const knockback =
+                120 * dt;
+
+            if (newDistance > 0) {
+
+                enemy.x -=
+                    ((player.x - enemy.x) /
+                    newDistance) *
+                    knockback;
+
+                enemy.y -=
+                    ((player.y - enemy.y) /
+                    newDistance) *
+                    knockback;
+            }
+
+            if (player.health <= 0) {
+
+                player.health = 0;
+
+                finishGame();
+
+                return;
+            }
+        }
     }
 }
-
 
 /* =========================================================
    VOID RING
@@ -881,25 +1593,136 @@ function updateVoidRing(dt) {
 
 function killEnemy(index) {
 
-    const enemy = enemies[index];
+    const enemy =
+        enemies[index];
 
-    scrap +=
-        Math.floor(Math.random() * 8) + 5;
+    if (!enemy) {
+        return;
+    }
+
+
+    /*
+        Scrap reward scales slightly
+        with enemy difficulty.
+    */
+
+    let scrapReward =
+        Math.floor(
+            Math.random() * 8
+        ) + 5;
+
+
+    if (enemy.type === "splitter") {
+        scrapReward += 8;
+    }
+
+    if (enemy.type === "gunner") {
+        scrapReward += 5;
+    }
+
+    if (enemy.type === "voidling") {
+        scrapReward += 10;
+    }
+
+    if (enemy.type === "stalker") {
+        scrapReward += 8;
+    }
+
+    if (enemy.type === "boss") {
+        scrapReward += 150;
+    }
+
+
+    scrap += scrapReward;
 
     kills++;
-
     roomKills++;
+
 
     createExplosion(
         enemy.x,
         enemy.y
     );
 
-    enemies.splice(index, 1);
+
+    /*
+        SPLITTER
+        Creates five normal Crawlers.
+
+        These are additional enemies,
+        so roomSpawned is NOT increased.
+        They must still be defeated before
+        the room can finish.
+    */
+
+    if (
+        enemy.type === "splitter"
+    ) {
+
+        for (
+            let i = 0;
+            i < 5;
+            i++
+        ) {
+
+            const angle =
+                i *
+                (Math.PI * 2 / 5);
+
+            const distance = 55;
+
+            const health =
+                ENEMY_TYPES.crawler
+                .health(depth);
+
+            enemies.push({
+
+                type: "crawler",
+
+                x:
+                    enemy.x +
+                    Math.cos(angle) *
+                    distance,
+
+                y:
+                    enemy.y +
+                    Math.sin(angle) *
+                    distance,
+
+                radius:
+                    ENEMY_TYPES.crawler.radius,
+
+                health,
+
+                maxHealth:
+                    health,
+
+                speed:
+                    ENEMY_TYPES.crawler
+                    .speed(depth),
+
+                damage:
+                    ENEMY_TYPES.crawler
+                    .damage(depth),
+
+                shootCooldown: 0,
+
+                ringCooldown: 0,
+
+                turretAngles: null
+
+            });
+        }
+    }
+
+
+    enemies.splice(
+        index,
+        1
+    );
 
     updateHUD();
 }
-
 
 /* =========================================================
    PARTICLES
@@ -1564,6 +2387,53 @@ function drawBullets() {
     }
 }
 
+/* =========================================================
+   DRAW ENEMY BULLETS
+========================================================= */
+
+function drawEnemyBullets() {
+
+    const scale =
+        getWorldScale();
+
+    for (const bullet of enemyBullets) {
+
+        const radius =
+            bullet.radius /
+            scale;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x,
+            bullet.y,
+            radius + 3 / scale,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            "rgba(255, 85, 119, 0.12)";
+
+        ctx.fill();
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x,
+            bullet.y,
+            radius,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            "#ff5577";
+
+        ctx.fill();
+    }
+}
 
 /* =========================================================
    DRAW ENEMIES
@@ -1580,6 +2450,101 @@ function drawEnemies() {
             enemy.radius /
             scale;
 
+        const color =
+            ENEMY_TYPES[
+                enemy.type
+            ].color;
+
+
+        /*
+            VOID RING ENEMIES
+        */
+
+        if (
+            enemy.type === "voidling" ||
+            enemy.type === "boss"
+        ) {
+
+            const ringRadius =
+                enemy.radius *
+                2.2 /
+                scale;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                enemy.x,
+                enemy.y,
+                ringRadius,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.strokeStyle =
+                enemy.type === "boss"
+                    ? "rgba(114, 215, 255, 0.45)"
+                    : "rgba(168, 85, 247, 0.40)";
+
+            ctx.lineWidth =
+                3 / scale;
+
+            ctx.shadowBlur =
+                18 / scale;
+
+            ctx.shadowColor =
+                color;
+
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+        }
+
+
+        /*
+            OUTER GLOW
+        */
+
+        ctx.beginPath();
+
+        ctx.arc(
+            enemy.x,
+            enemy.y,
+            radius + 8 / scale,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle =
+            color
+                .replace(")", ", 0.10)")
+                .replace("rgb", "rgba");
+
+        /*
+            Hex colors cannot be directly converted
+            with the above approach, so use alpha
+            through a fixed glow instead.
+        */
+
+        ctx.fillStyle =
+            enemy.type === "boss"
+                ? "rgba(114, 215, 255, 0.10)"
+                : enemy.type === "voidling"
+                    ? "rgba(168, 85, 247, 0.10)"
+                    : enemy.type === "gunner"
+                        ? "rgba(184, 255, 61, 0.09)"
+                        : enemy.type === "stalker"
+                            ? "rgba(255, 228, 77, 0.09)"
+                            : enemy.type === "splitter"
+                                ? "rgba(255, 138, 61, 0.09)"
+                                : "rgba(255, 85, 119, 0.08)";
+
+        ctx.fill();
+
+
+        /*
+            MAIN BODY
+        */
+
         ctx.beginPath();
 
         ctx.arc(
@@ -1591,12 +2556,178 @@ function drawEnemies() {
         );
 
         ctx.fillStyle =
-            "#ff5577";
+            color;
 
         ctx.fill();
 
+
         /*
-            Health bar
+            BOSS CORE
+        */
+
+        if (enemy.type === "boss") {
+
+            ctx.beginPath();
+
+            ctx.arc(
+                enemy.x,
+                enemy.y,
+                radius * 0.45,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                "#050912";
+
+            ctx.fill();
+
+            ctx.beginPath();
+
+            ctx.arc(
+                enemy.x,
+                enemy.y,
+                radius * 0.22,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                "#72d7ff";
+
+            ctx.fill();
+        }
+
+
+        /*
+            TURRET / BARREL
+        */
+
+        if (
+            enemy.type === "gunner" ||
+            enemy.type === "voidling"
+        ) {
+
+            const angle =
+                Math.atan2(
+                    player.y - enemy.y,
+                    player.x - enemy.x
+                );
+
+            const barrelLength =
+                radius * 1.45;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                enemy.x +
+                    Math.cos(angle) *
+                    radius * 0.25,
+
+                enemy.y +
+                    Math.sin(angle) *
+                    radius * 0.25
+            );
+
+            ctx.lineTo(
+                enemy.x +
+                    Math.cos(angle) *
+                    barrelLength,
+
+                enemy.y +
+                    Math.sin(angle) *
+                    barrelLength
+            );
+
+            ctx.strokeStyle =
+                "#d9e6ef";
+
+            ctx.lineWidth =
+                5 / scale;
+
+            ctx.stroke();
+        }
+
+
+        /*
+            BOSS TURRETS
+        */
+
+        if (enemy.type === "boss") {
+
+            for (
+                let i = 0;
+                i < 8;
+                i++
+            ) {
+
+                const angle =
+                    Math.atan2(
+                        player.y - enemy.y,
+                        player.x - enemy.x
+                    ) +
+                    (i - 3.5) *
+                    0.075;
+
+                const turretDistance =
+                    radius * 0.62;
+
+                const turretX =
+                    enemy.x +
+                    Math.cos(angle) *
+                    turretDistance;
+
+                const turretY =
+                    enemy.y +
+                    Math.sin(angle) *
+                    turretDistance;
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    turretX,
+                    turretY,
+                    radius * 0.11,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fillStyle =
+                    "#72d7ff";
+
+                ctx.fill();
+
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    turretX,
+                    turretY
+                );
+
+                ctx.lineTo(
+                    turretX +
+                        Math.cos(angle) *
+                        radius * 0.22,
+
+                    turretY +
+                        Math.sin(angle) *
+                        radius * 0.22
+                );
+
+                ctx.strokeStyle =
+                    "#dff7ff";
+
+                ctx.lineWidth =
+                    3 / scale;
+
+                ctx.stroke();
+            }
+        }
+
+
+        /*
+            HEALTH BAR
         */
 
         const healthPercent =
@@ -1607,28 +2738,38 @@ function drawEnemies() {
             );
 
         const barWidth =
-            32 / scale;
+            Math.max(
+                32,
+                radius * 2
+            );
 
         const barHeight =
-            3 / scale;
+            enemy.type === "boss"
+                ? 5
+                : 3;
 
         ctx.fillStyle =
             "rgba(255,255,255,0.08)";
 
         ctx.fillRect(
             enemy.x - barWidth / 2,
-            enemy.y - radius - 9 / scale,
+            enemy.y -
+                radius -
+                9 / scale,
             barWidth,
             barHeight
         );
 
         ctx.fillStyle =
-            "#ff5577";
+            color;
 
         ctx.fillRect(
             enemy.x - barWidth / 2,
-            enemy.y - radius - 9 / scale,
-            barWidth * healthPercent,
+            enemy.y -
+                radius -
+                9 / scale,
+            barWidth *
+                healthPercent,
             barHeight
         );
     }
@@ -1684,13 +2825,14 @@ function draw() {
 
     drawBullets();
 
+    drawEnemyBullets();
+
     drawEnemies();
 
     drawParticles();
 
     drawPlayer();
 }
-
 
 /* =========================================================
    MAIN LOOP
@@ -1715,7 +2857,7 @@ function gameLoop(timestamp) {
         updateEnemies(dt);
 
         updateVoidRing(dt);
-
+        updateEnemyBullets(dt);
         updateParticles(dt);
 
         /*Spawn the fixed number of enemies assigned to this room.*/
