@@ -1337,16 +1337,16 @@ function updateBullets(dt) {
         const margin = 100;
 
         if (
-            bullet.x < -margin ||
-            bullet.x > canvas.width + margin ||
-            bullet.y < -margin ||
-            bullet.y > canvas.height + margin
-        ) {
-
-            bullets.splice(i, 1);
-
-            continue;
-        }
+             bullet.x < 0 ||
+             bullet.x > canvas.width ||
+             bullet.y < 0 ||
+             bullet.y > canvas.height
+         ) {
+         
+             bullets.splice(i, 1);
+         
+             continue;
+         }
 
         for (
             let j = enemies.length - 1;
