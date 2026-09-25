@@ -31,16 +31,16 @@ const MAX_ROOMS = 10;
     spawn and be defeated to clear each room.
 */
 const ROOM_ENEMIES = [
-    22,
-    28,
-    35,
-    42,
-    52,
-    62,
-    75,
-    90,
+    57,
+    63,
+    70,
+    77,
+    87,
+    97,
     110,
-    135
+    125,
+    145,
+    170
 ];
 
 /* =========================================================
@@ -55,7 +55,7 @@ const ENEMY_TYPES = {
         radius: 15,
 
         health: depth =>
-            45 + depth * 12,
+            (45 + depth * 12) * 2,
 
         speed: depth =>
             70 + depth * 8,
@@ -73,7 +73,7 @@ const ENEMY_TYPES = {
         radius: 45,
 
         health: depth =>
-            260 + depth * 28,
+            (260 + depth * 28) * 2,
 
         speed: depth =>
             48 + depth * 4,
@@ -91,7 +91,7 @@ const ENEMY_TYPES = {
         radius: 22.5,
 
         health: depth =>
-            180 + depth * 20,
+            (180 + depth * 20) * 2,
 
         speed: depth =>
             52 + depth * 5,
@@ -109,7 +109,7 @@ const ENEMY_TYPES = {
         radius: 37.5,
 
         health: depth =>
-            360 + depth * 35,
+            (360 + depth * 35) * 2,
 
         speed: depth =>
             42 + depth * 4,
@@ -127,7 +127,7 @@ const ENEMY_TYPES = {
         radius: 30,
 
         health: depth =>
-            250 + depth * 25,
+            (250 + depth * 25) * 2,
 
         speed: depth =>
             (70 + depth * 8) * 2,
@@ -145,7 +145,7 @@ const ENEMY_TYPES = {
         radius: 90,
 
         health: depth =>
-            6500,
+            6500 * 2,
 
         speed: depth =>
             34,
@@ -265,6 +265,24 @@ const voidRing = {
     hitCooldown: 0.35
 };
 
+/* =========================================================
+   EXPLOSIVE BULLETS
+========================================================= */
+
+const explosiveBullets = {
+
+    enabled: false,
+
+    damage: 50,
+
+    radius: 45,
+
+    damageRadiusIncrease: 12,
+
+    damageIncrease: 25
+
+};
+
 
 /* =========================================================
    UPGRADES
@@ -312,6 +330,13 @@ const upgrades = {
         description: "+1 projectile",
         baseCost: 40,
         tier: 0
+    },
+
+    explosive: {
+       name: "EXPLOSIVE BULLETS",
+       description: "Bullets explode on impact",
+       baseCost: 45,
+       tier: 0
     },
 
     voidRing: {
@@ -702,6 +727,10 @@ function startGame() {
     voidRing.damage = 10;
     voidRing.cooldown = 0;
 
+    explosiveBullets.enabled = false;
+    explosiveBullets.damage = 50;
+    explosiveBullets.radius = 45;
+
     startScreen.classList.add("hidden");
     deathScreen.classList.add("hidden");
     clearScreen.classList.add("hidden");
@@ -811,12 +840,12 @@ function roomIsComplete() {
 function getEnemyCap() {
 
     if (depth === 10) {
-        return 10;
+        return 25;
     }
 
     return Math.min(
-        8 + depth * 2,
-        24
+        12 + depth * 2,
+        30
     );
 
 }
@@ -824,12 +853,11 @@ function getEnemyCap() {
 function getSpawnDelay() {
 
     return Math.max(
-        0.18,
-        0.65 - depth * 0.045
+        0.08,
+        0.42 - depth * 0.032
     );
 
 }
-
 
 /* =========================================================
    ENEMY SELECTION
@@ -838,42 +866,72 @@ function getSpawnDelay() {
 function getEnemyTypeForRoom() {
 
     /*
-        Room 10 is the boss room.
+        ROOM 10
+        Every normal enemy type can spawn,
+        but the VOID TITAN is ALWAYS last.
     */
 
     if (depth === 10) {
 
-        if (roomSpawned === 0) {
+        if (
+            roomSpawned ===
+            roomEnemiesRequired - 1
+        ) {
             return "boss";
+        }
+
+        const roll =
+            Math.random();
+
+        if (roll < 0.20) {
+            return "stalker";
+        }
+
+        if (roll < 0.38) {
+            return "voidling";
+        }
+
+        if (roll < 0.56) {
+            return "gunner";
+        }
+
+        if (roll < 0.72) {
+            return "splitter";
         }
 
         return "crawler";
     }
 
 
-    const roll = Math.random();
-
-
-    /* Rooms 1–2 */
+    /*
+        ROOMS 1–2
+    */
 
     if (depth < 3) {
         return "crawler";
     }
 
 
-    /* Room 3–4 */
+    /*
+        ROOMS 3–4
+    */
 
     if (depth < 5) {
 
-        return roll < 0.20
+        return Math.random() < 0.20
             ? "splitter"
             : "crawler";
     }
 
 
-    /* Room 5–6 */
+    /*
+        ROOMS 5–6
+    */
 
     if (depth < 7) {
+
+        const roll =
+            Math.random();
 
         if (roll < 0.12) {
             return "gunner";
@@ -887,9 +945,14 @@ function getEnemyTypeForRoom() {
     }
 
 
-    /* Room 7–8 */
+    /*
+        ROOMS 7–8
+    */
 
     if (depth < 9) {
+
+        const roll =
+            Math.random();
 
         if (roll < 0.08) {
             return "voidling";
@@ -907,33 +970,31 @@ function getEnemyTypeForRoom() {
     }
 
 
-    /* Room 9 */
+    /*
+        ROOM 9
+    */
 
-    if (depth === 9) {
+    const roll =
+        Math.random();
 
-        if (roll < 0.10) {
-            return "stalker";
-        }
-
-        if (roll < 0.18) {
-            return "voidling";
-        }
-
-        if (roll < 0.30) {
-            return "gunner";
-        }
-
-        if (roll < 0.43) {
-            return "splitter";
-        }
-
-        return "crawler";
+    if (roll < 0.10) {
+        return "stalker";
     }
 
+    if (roll < 0.18) {
+        return "voidling";
+    }
+
+    if (roll < 0.30) {
+        return "gunner";
+    }
+
+    if (roll < 0.43) {
+        return "splitter";
+    }
 
     return "crawler";
 }
-
 
 /* =========================================================
    SPAWN ENEMY
@@ -1159,6 +1220,106 @@ function updatePlayer(dt) {
     }
 }
 
+/* =========================================================
+   EXPLOSION DAMAGE
+========================================================= */
+
+function createBulletExplosion(x, y) {
+
+    const explosionRadius =
+        explosiveBullets.radius;
+
+    const explosionDamage =
+        explosiveBullets.damage;
+
+
+    /*
+        Visual explosion
+    */
+
+    for (let i = 0; i < 18; i++) {
+
+        const angle =
+            Math.random() *
+            Math.PI *
+            2;
+
+        const speed =
+            80 +
+            Math.random() * 180;
+
+        particles.push({
+
+          x,
+          y,
+      
+          vx:
+              Math.cos(angle) *
+              speed,
+      
+          vy:
+              Math.sin(angle) *
+              speed,
+      
+          life:
+              0.35 +
+              Math.random() * 0.25,
+      
+          type: "explosion"
+      
+      });
+    }
+
+
+    /*
+        Damage every enemy inside
+        the explosion.
+    */
+
+    for (
+        let i = enemies.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const enemy =
+            enemies[i];
+
+        const dx =
+            enemy.x - x;
+
+        const dy =
+            enemy.y - y;
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+        if (
+            distance <=
+            explosionRadius +
+            enemy.radius
+        ) {
+
+            enemy.health -=
+                explosionDamage;
+
+            createHitParticles(
+                enemy.x,
+                enemy.y
+            );
+
+            if (
+                enemy.health <= 0
+            ) {
+
+                killEnemy(i);
+            }
+        }
+    }
+}
 
 /* =========================================================
    BULLET UPDATE
@@ -1211,22 +1372,47 @@ function updateBullets(dt) {
             ) {
 
                 enemy.health -=
-                    bullet.damage;
-
-                createHitParticles(
-                    enemy.x,
-                    enemy.y
+                bullet.damage;
+            
+            createHitParticles(
+                enemy.x,
+                enemy.y
+            );
+            
+            bullets.splice(i, 1);
+            
+            
+            /*
+                Explosive Bullet
+            */
+            
+            if (
+                explosiveBullets.enabled
+            ) {
+            
+                createBulletExplosion(
+                    bullet.x,
+                    bullet.y
                 );
-
-                bullets.splice(i, 1);
-
-                if (enemy.health <= 0) {
-
-                    killEnemy(j);
-
-                }
-
-                break;
+            
+            }
+            
+            
+            /*
+                Direct hit killed enemy.
+            */
+            
+            if (
+                enemy.health <= 0 &&
+                enemies[j]
+            ) {
+            
+                killEnemy(j);
+            
+            }
+            
+            break;
+               
             }
         }
     }
@@ -1911,6 +2097,22 @@ function applyUpgrade(key) {
 
             break;
 
+        case "explosive":
+
+        explosiveBullets.enabled =
+           true;
+   
+        explosiveBullets.damage =
+           50 +
+           (upgrade.tier - 1) *
+           explosiveBullets.damageIncrease;
+   
+        explosiveBullets.radius =
+           45 +
+           (upgrade.tier - 1) *
+           explosiveBullets.damageRadiusIncrease;
+   
+        break;
 
         case "voidRing":
 
@@ -1996,6 +2198,7 @@ function renderUpgrades() {
         if (key === "fireRate") icon = "≋";
         if (key === "bulletSpeed") icon = "➜";
         if (key === "multishot") icon = "✣";
+        if (key === "explosive") icon = "✹";
         if (key === "voidRing") icon = "◎";
 
         card.innerHTML = `
@@ -2807,14 +3010,15 @@ function drawParticles() {
         );
 
         ctx.fillStyle =
-            "#72d7ff";
+            particle.type === "explosion"
+                ? "#ffb347"
+                : "#72d7ff";
 
         ctx.fill();
     }
 
     ctx.globalAlpha = 1;
 }
-
 
 /* =========================================================
    DRAW
