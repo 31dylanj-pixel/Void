@@ -1,0 +1,425 @@
+/* =========================================================
+   VOID
+   Phase 1A
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #050912;
+    --panel: rgba(8, 17, 30, 0.78);
+
+    --text: #eef5ff;
+    --muted: #71809a;
+
+    --accent: #72d7ff;
+    --accent-soft: rgba(114, 215, 255, 0.18);
+
+    --danger: #ff5577;
+
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    width: 100%;
+    height: 100vh;
+
+    overflow: hidden;
+
+    background: var(--bg);
+    color: var(--text);
+
+    font-family: "Montserrat", sans-serif;
+
+    user-select: none;
+}
+
+#game-container {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+}
+
+canvas {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    cursor: none;
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+#hud {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+
+    padding: 22px 26px;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    pointer-events: none;
+
+    z-index: 10;
+}
+
+.hud-left {
+    display: flex;
+    gap: 28px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.label {
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 2px;
+
+    color: var(--muted);
+}
+
+.stat > span:last-child {
+    font-size: 19px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.hud-center {
+    position: absolute;
+
+    left: 50%;
+    transform: translateX(-50%);
+
+    top: 24px;
+}
+
+#room-status {
+    padding: 8px 15px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 8px;
+
+    background: rgba(5, 9, 18, 0.65);
+
+    color: var(--muted);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 2px;
+}
+
+.hud-right {
+    width: 180px;
+}
+
+.health-container {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.health-label {
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+
+    color: var(--muted);
+}
+
+.health-bar {
+    width: 100%;
+    height: 5px;
+
+    border-radius: 99px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    overflow: hidden;
+}
+
+#health-fill {
+    width: 100%;
+    height: 100%;
+
+    background: var(--accent);
+
+    transition: width 0.15s ease;
+}
+
+
+/* =========================================================
+   CROSSHAIR
+========================================================= */
+
+#crosshair {
+    position: absolute;
+
+    width: 18px;
+    height: 18px;
+
+    pointer-events: none;
+
+    z-index: 20;
+
+    transform: translate(-50%, -50%);
+}
+
+.crosshair-line {
+    position: absolute;
+
+    background: rgba(255, 255, 255, 0.75);
+}
+
+.horizontal {
+    width: 18px;
+    height: 1px;
+
+    top: 8px;
+    left: 0;
+}
+
+.vertical {
+    width: 1px;
+    height: 18px;
+
+    top: 0;
+    left: 8px;
+}
+
+
+/* =========================================================
+   OVERLAYS
+========================================================= */
+
+.overlay {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 50;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(22, 51, 76, 0.24),
+            rgba(5, 9, 18, 0.94) 70%
+        );
+
+    backdrop-filter: blur(4px);
+}
+
+.hidden {
+    display: none;
+}
+
+.title-container,
+.death-container {
+    width: min(500px, 90%);
+
+    text-align: center;
+}
+
+.subtitle {
+    margin-bottom: 10px;
+
+    color: var(--accent);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 5px;
+}
+
+h1 {
+    font-size: clamp(70px, 13vw, 130px);
+
+    line-height: 0.9;
+
+    letter-spacing: 12px;
+
+    font-weight: 800;
+
+    margin-right: -12px;
+
+    text-shadow:
+        0 0 35px rgba(114, 215, 255, 0.18);
+}
+
+.title-container p {
+    margin-top: 22px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+button {
+    margin-top: 34px;
+
+    padding: 14px 28px;
+
+    border: 1px solid rgba(114, 215, 255, 0.35);
+
+    border-radius: 7px;
+
+    background: rgba(114, 215, 255, 0.08);
+
+    color: var(--text);
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+button:hover {
+    background: rgba(114, 215, 255, 0.16);
+
+    border-color: rgba(114, 215, 255, 0.7);
+
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.controls {
+    margin-top: 45px;
+
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+
+    color: var(--muted);
+
+    font-size: 8px;
+    letter-spacing: 1.5px;
+}
+
+.controls b {
+    color: var(--text);
+}
+
+
+/* =========================================================
+   DEATH SCREEN
+========================================================= */
+
+.death-container h2 {
+    margin-top: 8px;
+
+    font-size: clamp(45px, 8vw, 75px);
+
+    letter-spacing: 6px;
+
+    font-weight: 800;
+}
+
+.run-stats {
+    margin-top: 35px;
+
+    display: flex;
+    justify-content: center;
+
+    gap: 45px;
+}
+
+.run-stats div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.run-stats span {
+    font-size: 8px;
+
+    color: var(--muted);
+
+    font-weight: 700;
+
+    letter-spacing: 2px;
+}
+
+.run-stats strong {
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    #hud {
+        padding: 16px;
+    }
+
+    .hud-left {
+        gap: 15px;
+    }
+
+    .hud-right {
+        width: 120px;
+    }
+
+    .controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .run-stats {
+        gap: 25px;
+    }
+
+}
