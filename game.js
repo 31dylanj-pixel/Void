@@ -220,6 +220,7 @@ let particles = [];
 ========================================================= */
 
 const depthText = document.getElementById("depth");
+const roomStatus = document.getElementById("room-status");
 const scrapText = document.getElementById("scrap");
 
 const enemyCountText = document.getElementById("enemy-count");
@@ -239,6 +240,20 @@ const continueButton = document.getElementById("continue-button");
 const clearTitle = document.getElementById("clear-title");
 const clearMessage = document.getElementById("clear-message");
 
+const startButton = document.getElementById("start-button");
+const restartButton = document.getElementById("restart-button");
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+startButton.addEventListener("click", () => {
+    startGame();
+});
+
+restartButton.addEventListener("click", () => {
+    startGame();
+});
 
 /* =========================================================
    ROOM TRANSITION
@@ -1272,6 +1287,10 @@ function updateHUD() {
             `ROOM ${depth}`;
     }
 
+    if (roomStatus) {
+       roomStatus.textContent =
+           `ROOM ${String(depth).padStart(2, "0")}`;
+    }
     if (scrapText) {
         scrapText.textContent =
             scrap;
