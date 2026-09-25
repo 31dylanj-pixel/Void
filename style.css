@@ -484,26 +484,36 @@ button:active {
     background:
         radial-gradient(
             circle at center,
-            rgba(20, 55, 85, 0.28),
-            rgba(5, 9, 18, 0.94) 70%
+            rgba(20, 55, 85, 0.30),
+            rgba(5, 9, 18, 0.96) 72%
         );
+
     backdrop-filter: blur(14px);
 }
 
+
+/* =========================================================
+   PANEL
+========================================================= */
+
 .upgrade-panel {
     width: min(900px, 90vw);
-    padding: 42px 46px 38px;
+
+    padding: 40px 44px 34px;
 
     text-align: center;
 
     background:
         linear-gradient(
             145deg,
-            rgba(15, 29, 48, 0.88),
-            rgba(7, 15, 27, 0.94)
+            rgba(15, 29, 48, 0.92),
+            rgba(7, 15, 27, 0.97)
         );
 
-    border: 1px solid rgba(114, 215, 255, 0.16);
+    border:
+        1px solid
+        rgba(114, 215, 255, 0.16);
+
     border-radius: 22px;
 
     box-shadow:
@@ -511,94 +521,466 @@ button:active {
         inset 0 0 40px rgba(114, 215, 255, 0.025),
         0 0 35px rgba(114, 215, 255, 0.04);
 
-    animation: upgradePanelIn 0.5s cubic-bezier(.22, 1, .36, 1);
+    animation:
+        upgradePanelIn
+        0.5s
+        cubic-bezier(.22, 1, .36, 1);
 }
 
-.upgrade-panel h2 {
-    margin: 4px 0 14px;
 
-    font-family: "Montserrat", sans-serif;
-    font-size: clamp(28px, 4vw, 42px);
-    font-weight: 800;
-    letter-spacing: 0.06em;
-
-    color: #eef5ff;
-
-    text-shadow:
-        0 0 24px rgba(114, 215, 255, 0.18);
-}
+/* =========================================================
+   HEADER
+========================================================= */
 
 .upgrade-panel .subtitle {
     margin-bottom: 8px;
 
     font-family: "Orbitron", sans-serif;
+
     font-size: 11px;
+
     letter-spacing: 0.28em;
 
-    color: #72d7ff;
+    color: var(--accent);
 }
 
-.upgrade-scrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
 
-    margin: 4px 0 10px;
-    padding: 8px 15px;
-
-    font-family: "Orbitron", sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-
-    color: #8b9ab0;
-
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 999px;
-}
-
-.upgrade-scrap span {
-    color: #72d7ff;
-    font-weight: 700;
-
-    text-shadow:
-        0 0 12px rgba(114, 215, 255, 0.45);
-}
-
-.upgrade-subtitle {
-    margin: 8px 0 28px;
+.upgrade-panel h2 {
+    margin: 4px 0 14px;
 
     font-family: "Montserrat", sans-serif;
-    font-size: 13px;
 
-    color: #71809a;
+    font-size: clamp(28px, 4vw, 42px);
+
+    font-weight: 800;
+
+    letter-spacing: 0.06em;
+
+    color: var(--text);
+
+    text-shadow:
+        0 0 24px
+        rgba(114, 215, 255, 0.18);
 }
 
 
 /* =========================================================
-   UPGRADE CARDS
+   SCRAP DISPLAY
+========================================================= */
+
+.upgrade-scrap {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin: 4px 0 10px;
+
+    padding: 8px 15px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 12px;
+
+    letter-spacing: 0.14em;
+
+    color: #8b9ab0;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    border-radius: 999px;
+}
+
+
+.upgrade-scrap span {
+    color: var(--accent);
+
+    font-weight: 700;
+
+    text-shadow:
+        0 0 12px
+        rgba(114, 215, 255, 0.45);
+}
+
+
+.upgrade-subtitle {
+    margin: 8px 0 28px;
+
+    font-size: 13px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   UPGRADE OPTIONS
 ========================================================= */
 
 .upgrade-options {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 16px;
+
+    width: 100%;
 }
 
-.upgrade-options > * {
-    animation: upgradeCardIn 0.5s cubic-bezier(.22, 1, .36, 1) both;
+
+/* =========================================================
+   UPGRADE CARD
+========================================================= */
+
+.upgrade-card {
+    position: relative;
+
+    min-height: 245px;
+
+    padding: 24px 20px 20px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+    font-family: "Montserrat", sans-serif;
+
+    color: var(--text);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 34, 54, 0.88),
+            rgba(8, 18, 31, 0.96)
+        );
+
+    border:
+        1px solid
+        rgba(114, 215, 255, 0.13);
+
+    border-radius: 18px;
+
+    box-shadow:
+        inset 0 0 25px
+        rgba(114, 215, 255, 0.025),
+
+        0 10px 30px
+        rgba(0, 0, 0, 0.18);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.22s ease,
+        border-color 0.22s ease,
+        background 0.22s ease,
+        box-shadow 0.22s ease;
 }
 
-.upgrade-options > *:nth-child(1) {
+
+/* =========================================================
+   CARD HOVER
+========================================================= */
+
+.upgrade-card:hover {
+    transform: translateY(-5px);
+
+    border-color:
+        rgba(114, 215, 255, 0.42);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(22, 45, 68, 0.94),
+            rgba(8, 20, 35, 0.98)
+        );
+
+    box-shadow:
+        0 14px 35px
+        rgba(0, 0, 0, 0.28),
+
+        0 0 28px
+        rgba(114, 215, 255, 0.07),
+
+        inset 0 0 30px
+        rgba(114, 215, 255, 0.035);
+}
+
+
+.upgrade-card:active {
+    transform: translateY(-2px);
+}
+
+
+/* =========================================================
+   CARD ICON
+========================================================= */
+
+.upgrade-icon {
+    position: relative;
+
+    width: 52px;
+    height: 52px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 17px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 22px;
+
+    color: var(--accent);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(114, 215, 255, 0.12),
+            rgba(114, 215, 255, 0.025) 70%
+        );
+
+    border:
+        1px solid
+        rgba(114, 215, 255, 0.20);
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 0 20px
+        rgba(114, 215, 255, 0.05);
+
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+}
+
+
+.upgrade-card:hover .upgrade-icon {
+    transform: scale(1.06);
+
+    box-shadow:
+        0 0 24px
+        rgba(114, 215, 255, 0.12);
+}
+
+
+/* =========================================================
+   ICON PULSE
+========================================================= */
+
+.upgrade-card .upgrade-icon::after {
+    content: "";
+
+    position: absolute;
+
+    width: 32px;
+    height: 32px;
+
+    border:
+        1px solid
+        rgba(114, 215, 255, 0.20);
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    animation:
+        voidPulse
+        2.2s
+        infinite
+        ease-in-out;
+}
+
+
+@keyframes voidPulse {
+
+    0%,
+    100% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+
+}
+
+
+/* =========================================================
+   CARD NAME
+========================================================= */
+
+.upgrade-name {
+    margin-bottom: 9px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.12em;
+
+    color: var(--text);
+}
+
+
+/* =========================================================
+   CARD DESCRIPTION
+========================================================= */
+
+.upgrade-description {
+    min-height: 42px;
+
+    max-width: 190px;
+
+    font-size: 12px;
+
+    line-height: 1.55;
+
+    color: #8190a5;
+}
+
+
+/* =========================================================
+   TIER
+========================================================= */
+
+.upgrade-tier {
+    margin-top: auto;
+
+    margin-bottom: 11px;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 10px;
+
+    letter-spacing: 0.16em;
+
+    color: #64748b;
+}
+
+
+/* =========================================================
+   COST
+========================================================= */
+
+.upgrade-cost {
+    width: 100%;
+
+    padding: 9px 0;
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    letter-spacing: 0.1em;
+
+    color: var(--accent);
+
+    background:
+        rgba(114, 215, 255, 0.055);
+
+    border:
+        1px solid
+        rgba(114, 215, 255, 0.12);
+
+    border-radius: 9px;
+}
+
+
+/* =========================================================
+   UNAFFORDABLE
+========================================================= */
+
+.upgrade-card.unaffordable {
+    opacity: 0.45;
+
+    cursor: default;
+}
+
+
+.upgrade-card.unaffordable:hover {
+    transform: none;
+
+    border-color:
+        rgba(255, 255, 255, 0.08);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 34, 54, 0.70),
+            rgba(8, 18, 31, 0.80)
+        );
+
+    box-shadow:
+        inset 0 0 25px
+        rgba(114, 215, 255, 0.015);
+}
+
+
+/* =========================================================
+   CARD ANIMATION
+========================================================= */
+
+.upgrade-card {
+    animation:
+        upgradeCardIn
+        0.5s
+        cubic-bezier(.22, 1, .36, 1)
+        both;
+}
+
+
+.upgrade-card:nth-child(1) {
     animation-delay: 0.08s;
 }
 
-.upgrade-options > *:nth-child(2) {
+
+.upgrade-card:nth-child(2) {
     animation-delay: 0.16s;
 }
 
-.upgrade-options > *:nth-child(3) {
+
+.upgrade-card:nth-child(3) {
     animation-delay: 0.24s;
+}
+
+
+@keyframes upgradeCardIn {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+
 }
 
 
@@ -610,14 +992,20 @@ button:active {
     margin-top: 28px;
 }
 
+
 #continue-button {
     min-width: 230px;
 
     padding: 12px 22px;
 
+    margin-top: 0;
+
     font-family: "Montserrat", sans-serif;
+
     font-size: 12px;
+
     font-weight: 700;
+
     letter-spacing: 0.12em;
 
     color: #dff7ff;
@@ -629,10 +1017,11 @@ button:active {
             rgba(114, 215, 255, 0.045)
         );
 
-    border: 1px solid rgba(114, 215, 255, 0.25);
-    border-radius: 999px;
+    border:
+        1px solid
+        rgba(114, 215, 255, 0.25);
 
-    cursor: pointer;
+    border-radius: 999px;
 
     transition:
         transform 0.2s ease,
@@ -641,21 +1030,25 @@ button:active {
         box-shadow 0.2s ease;
 }
 
+
 #continue-button:hover {
     transform: translateY(-2px);
 
     background:
         linear-gradient(
             135deg,
-            rgba(114, 215, 255, 0.2),
+            rgba(114, 215, 255, 0.20),
             rgba(114, 215, 255, 0.07)
         );
 
-    border-color: rgba(114, 215, 255, 0.5);
+    border-color:
+        rgba(114, 215, 255, 0.50);
 
     box-shadow:
-        0 0 24px rgba(114, 215, 255, 0.12);
+        0 0 24px
+        rgba(114, 215, 255, 0.12);
 }
+
 
 #continue-button:active {
     transform: translateY(0);
@@ -663,162 +1056,29 @@ button:active {
 
 
 /* =========================================================
-   ANIMATIONS
+   PANEL ANIMATION
 ========================================================= */
 
 @keyframes upgradePanelIn {
 
     from {
         opacity: 0;
-        transform: translateY(18px) scale(0.97);
+
+        transform:
+            translateY(18px)
+            scale(0.97);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+
+        transform:
+            translateY(0)
+            scale(1);
     }
 
 }
 
-@keyframes upgradeCardIn {
-
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 700px) {
-
-    .upgrade-panel {
-        padding: 30px 20px 26px;
-    }
-
-    .upgrade-options {
-        grid-template-columns: 1fr;
-    }
-
-}
-/* =========================================================
-   VOID RING UPGRADE
-========================================================= */
-
-.upgrade-card {
-
-    position: relative;
-
-    overflow: hidden;
-}
-
-
-.upgrade-card::after {
-
-    content: "";
-
-    position: absolute;
-
-    inset: 0;
-
-    border-radius: inherit;
-
-    border: 1px solid transparent;
-
-    pointer-events: none;
-
-    transition:
-        border-color 0.2s ease;
-}
-
-
-.upgrade-card:hover::after {
-
-    border-color:
-        rgba(114,215,255,0.25);
-}
-
-
-/* =========================================================
-   UNAFFORDABLE
-========================================================= */
-
-.upgrade-card.unaffordable {
-
-    opacity: 0.55;
-}
-
-
-.upgrade-card.unaffordable:hover {
-
-    transform: none;
-
-    border-color:
-        rgba(255,255,255,0.12);
-
-    background:
-        rgba(255,255,255,0.045);
-
-    box-shadow: none;
-}
-
-
-/* =========================================================
-   VOID RING ICON
-========================================================= */
-
-.upgrade-card .upgrade-icon {
-
-    position: relative;
-}
-
-
-.upgrade-card .upgrade-icon::after {
-
-    content: "";
-
-    position: absolute;
-
-    width: 32px;
-    height: 32px;
-
-    border:
-        1px solid
-        rgba(114,215,255,0.25);
-
-    border-radius: 50%;
-
-    animation:
-        voidPulse 2s infinite ease-in-out;
-}
-
-
-@keyframes voidPulse {
-
-    0%,
-    100% {
-
-        transform: scale(0.8);
-
-        opacity: 0.3;
-    }
-
-    50% {
-
-        transform: scale(1.2);
-
-        opacity: 0.8;
-    }
-}
 
 /* =========================================================
    MOBILE
@@ -826,15 +1086,21 @@ button:active {
 
 @media (max-width: 750px) {
 
-    .upgrade-options {
+    .upgrade-panel {
+        padding:
+            30px
+            20px
+            26px;
+    }
 
+    .upgrade-options {
         grid-template-columns: 1fr;
     }
 
     .upgrade-card {
-
-        min-height: 170px;
+        min-height: 210px;
     }
+
 }
 
 /* =========================================================
