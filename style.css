@@ -230,40 +230,48 @@ canvas {
 ========================================================= */
 
 #crosshair {
-    position: absolute;
+    position: fixed;
 
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
 
     pointer-events: none;
 
-    z-index: 20;
-
     transform: translate(-50%, -50%);
+
+    z-index: 1000;
+
+    opacity: 0.8;
 }
 
 .crosshair-line {
     position: absolute;
 
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(235, 242, 250, 0.9);
+
+    box-shadow:
+        0 0 4px rgba(255, 255, 255, 0.35);
 }
 
-.horizontal {
-    width: 18px;
+.crosshair-line.horizontal {
+    width: 16px;
     height: 1px;
 
-    top: 8px;
+    top: 50%;
     left: 0;
+
+    transform: translateY(-50%);
 }
 
-.vertical {
+.crosshair-line.vertical {
     width: 1px;
-    height: 18px;
+    height: 16px;
 
+    left: 50%;
     top: 0;
-    left: 8px;
-}
 
+    transform: translateX(-50%);
+}
 
 /* =========================================================
    OVERLAYS
