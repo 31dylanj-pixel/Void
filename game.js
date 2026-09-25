@@ -810,13 +810,16 @@ function roomIsComplete() {
 
 function getEnemyCap() {
 
+    if (depth === 10) {
+        return 10;
+    }
+
     return Math.min(
         8 + depth * 2,
         24
     );
 
 }
-
 
 function getSpawnDelay() {
 
