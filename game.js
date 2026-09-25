@@ -27,8 +27,8 @@ resizeCanvas();
 const MAX_ROOMS = 10;
 
 /*
-    Number of actual weapon/ring kills required
-    to clear each room.
+    Total number of enemies that must
+    spawn and be defeated to clear each room.
 */
 const ROOM_ENEMIES = [
     12,
@@ -61,6 +61,7 @@ let kills = 0;
 let roomEnemiesRequired = 0;
 let roomKills = 0;
 let roomSpawned = 0;
+let spawnTimer = 0;
 
 /* =========================================================
    INPUT
