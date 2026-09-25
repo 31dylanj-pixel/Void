@@ -52,6 +52,8 @@ let gameRunning = false;
 let gameOver = false;
 let transitioning = false;
 
+let lastTime = 0;
+
 let depth = 1;
 let scrap = 0;
 let kills = 0;
