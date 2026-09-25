@@ -1,6 +1,6 @@
 /* =========================================================
    VOID
-   Phase 1B
+   Phase 2
 ========================================================= */
 
 * {
@@ -730,6 +730,115 @@ button:active {
         translateY(-2px);
 }
 
+/* =========================================================
+   VOID RING UPGRADE
+========================================================= */
+
+.upgrade-card {
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.upgrade-card::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: inherit;
+
+    border: 1px solid transparent;
+
+    pointer-events: none;
+
+    transition:
+        border-color 0.2s ease;
+}
+
+
+.upgrade-card:hover::after {
+
+    border-color:
+        rgba(114,215,255,0.25);
+}
+
+
+/* =========================================================
+   UNAFFORDABLE
+========================================================= */
+
+.upgrade-card.unaffordable {
+
+    opacity: 0.55;
+}
+
+
+.upgrade-card.unaffordable:hover {
+
+    transform: none;
+
+    border-color:
+        rgba(255,255,255,0.12);
+
+    background:
+        rgba(255,255,255,0.045);
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   VOID RING ICON
+========================================================= */
+
+.upgrade-card .upgrade-icon {
+
+    position: relative;
+}
+
+
+.upgrade-card .upgrade-icon::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 32px;
+    height: 32px;
+
+    border:
+        1px solid
+        rgba(114,215,255,0.25);
+
+    border-radius: 50%;
+
+    animation:
+        voidPulse 2s infinite ease-in-out;
+}
+
+
+@keyframes voidPulse {
+
+    0%,
+    100% {
+
+        transform: scale(0.8);
+
+        opacity: 0.3;
+    }
+
+    50% {
+
+        transform: scale(1.2);
+
+        opacity: 0.8;
+    }
+}
 
 /* =========================================================
    MOBILE
