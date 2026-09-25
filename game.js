@@ -90,8 +90,13 @@ window.addEventListener("keyup", e => {
 });
 
 window.addEventListener("mousemove", e => {
+
     mouse.x = e.clientX;
     mouse.y = e.clientY;
+
+    crosshair.style.left = `${e.clientX}px`;
+    crosshair.style.top = `${e.clientY}px`;
+
 });
 
 window.addEventListener("mousedown", e => {
@@ -239,6 +244,7 @@ const continueButton = document.getElementById("continue-button");
 
 const clearTitle = document.getElementById("clear-title");
 const clearMessage = document.getElementById("clear-message");
+const crosshair = document.getElementById("crosshair");
 
 const startButton = document.getElementById("start-button");
 const restartButton = document.getElementById("restart-button");
