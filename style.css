@@ -468,6 +468,99 @@ button:active {
     font-size: 12px;
 }
 
+/* =========================================================
+   UPGRADE SCREEN
+========================================================= */
+
+.upgrade-panel {
+    width: min(900px, 90vw);
+    text-align: center;
+}
+
+.upgrade-panel h1 {
+    margin: 10px 0;
+    font-size: clamp(32px, 5vw, 58px);
+    letter-spacing: 4px;
+}
+
+.eyebrow {
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 4px;
+    font-weight: 700;
+}
+
+.upgrade-subtitle {
+    color: var(--muted);
+    margin-bottom: 35px;
+}
+
+.upgrade-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.upgrade-card {
+    min-height: 180px;
+
+    padding: 28px 20px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+
+    background: rgba(255,255,255,0.045);
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.upgrade-card:hover {
+    transform: translateY(-6px);
+
+    border-color: var(--accent);
+
+    background: rgba(114,215,255,0.08);
+}
+
+.upgrade-title {
+    font-size: 17px;
+    font-weight: 700;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 18px;
+}
+
+.upgrade-description {
+    color: var(--muted);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .upgrade-options {
+        grid-template-columns: 1fr;
+    }
+
+    .upgrade-card {
+        min-height: 120px;
+    }
+}
 
 /* =========================================================
    RESPONSIVE
