@@ -469,68 +469,177 @@ button:active {
 }
 
 /* =========================================================
-   UPGRADE SCREEN
+   UPGRADE STATION
 ========================================================= */
 
 .upgrade-panel {
-    width: min(900px, 90vw);
+    width: min(1000px, 92vw);
     text-align: center;
 }
 
-.upgrade-panel h1 {
-    margin: 10px 0;
-    font-size: clamp(32px, 5vw, 58px);
-    letter-spacing: 4px;
-}
+.upgrade-panel h2 {
+    margin: 8px 0;
 
-.eyebrow {
-    color: var(--accent);
-    font-size: 12px;
+    font-size: clamp(30px, 5vw, 56px);
+
     letter-spacing: 4px;
-    font-weight: 700;
 }
 
 .upgrade-subtitle {
     color: var(--muted);
-    margin-bottom: 35px;
+
+    margin: 8px 0 28px;
 }
+
+
+/* =========================================================
+   SCRAP DISPLAY
+========================================================= */
+
+.upgrade-scrap {
+    display: inline-flex;
+
+    align-items: center;
+    gap: 10px;
+
+    margin: 15px auto;
+
+    padding: 8px 16px;
+
+    border: 1px solid rgba(114,215,255,0.25);
+
+    border-radius: 999px;
+
+    background: rgba(114,215,255,0.06);
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 2px;
+}
+
+.upgrade-scrap span {
+    color: var(--accent);
+
+    font-size: 16px;
+
+    letter-spacing: 0;
+}
+
+
+/* =========================================================
+   UPGRADE CARDS
+========================================================= */
 
 .upgrade-options {
+
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
     gap: 18px;
+
+    margin-top: 25px;
 }
 
+
 .upgrade-card {
-    min-height: 180px;
+
+    position: relative;
+
+    min-height: 240px;
 
     padding: 28px 20px;
 
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 18px;
+    border:
+        1px solid
+        rgba(255,255,255,0.12);
 
-    background: rgba(255,255,255,0.045);
+    border-radius: 20px;
+
+    background:
+        rgba(255,255,255,0.045);
 
     color: var(--text);
 
     cursor: pointer;
 
+    font-family: inherit;
+
     transition:
         transform 0.2s ease,
         border-color 0.2s ease,
-        background 0.2s ease;
+        background 0.2s ease,
+        box-shadow 0.2s ease;
 }
+
 
 .upgrade-card:hover {
-    transform: translateY(-6px);
 
-    border-color: var(--accent);
+    transform:
+        translateY(-7px);
 
-    background: rgba(114,215,255,0.08);
+    border-color:
+        var(--accent);
+
+    background:
+        rgba(114,215,255,0.07);
+
+    box-shadow:
+        0 15px 40px
+        rgba(0,0,0,0.25);
 }
 
+
+.upgrade-icon {
+
+    width: 55px;
+    height: 55px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 18px;
+
+    border:
+        1px solid
+        rgba(114,215,255,0.3);
+
+    border-radius: 50%;
+
+    color: var(--accent);
+
+    font-size: 24px;
+
+    background:
+        rgba(114,215,255,0.06);
+}
+
+
 .upgrade-title {
-    font-size: 17px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 8px;
+}
+
+
+.upgrade-tier {
+
+    color: var(--accent);
+
+    font-size: 11px;
+
     font-weight: 700;
 
     letter-spacing: 2px;
@@ -538,12 +647,87 @@ button:active {
     margin-bottom: 18px;
 }
 
+
 .upgrade-description {
+
     color: var(--muted);
 
-    font-size: 14px;
+    font-size: 13px;
 
-    line-height: 1.6;
+    line-height: 1.5;
+
+    margin-bottom: 22px;
+}
+
+
+.upgrade-cost {
+
+    display: inline-block;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,0.06);
+
+    color: var(--text);
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   CONTINUE
+========================================================= */
+
+.upgrade-continue {
+
+    margin-top: 28px;
+}
+
+
+#continue-button {
+
+    padding:
+        13px 28px;
+
+    border:
+        1px solid
+        rgba(114,215,255,0.35);
+
+    border-radius: 999px;
+
+    background:
+        rgba(114,215,255,0.08);
+
+    color: var(--accent);
+
+    font-family: inherit;
+
+    font-weight: 700;
+
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+#continue-button:hover {
+
+    background:
+        rgba(114,215,255,0.15);
+
+    transform:
+        translateY(-2px);
 }
 
 
@@ -551,14 +735,16 @@ button:active {
    MOBILE
 ========================================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 750px) {
 
     .upgrade-options {
+
         grid-template-columns: 1fr;
     }
 
     .upgrade-card {
-        min-height: 120px;
+
+        min-height: 170px;
     }
 }
 
