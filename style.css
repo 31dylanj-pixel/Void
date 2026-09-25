@@ -1,6 +1,6 @@
 /* =========================================================
    VOID
-   Phase 2
+   Phase 3
 ========================================================= */
 
 * {
@@ -480,61 +480,98 @@ button:active {
    UPGRADE STATION
 ========================================================= */
 
+#upgrade-screen {
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(20, 55, 85, 0.28),
+            rgba(5, 9, 18, 0.94) 70%
+        );
+    backdrop-filter: blur(14px);
+}
+
 .upgrade-panel {
-    width: min(1000px, 92vw);
+    width: min(900px, 90vw);
+    padding: 42px 46px 38px;
+
     text-align: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(15, 29, 48, 0.88),
+            rgba(7, 15, 27, 0.94)
+        );
+
+    border: 1px solid rgba(114, 215, 255, 0.16);
+    border-radius: 22px;
+
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.45),
+        inset 0 0 40px rgba(114, 215, 255, 0.025),
+        0 0 35px rgba(114, 215, 255, 0.04);
+
+    animation: upgradePanelIn 0.5s cubic-bezier(.22, 1, .36, 1);
 }
 
 .upgrade-panel h2 {
-    margin: 8px 0;
+    margin: 4px 0 14px;
 
-    font-size: clamp(30px, 5vw, 56px);
+    font-family: "Montserrat", sans-serif;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    letter-spacing: 0.06em;
 
-    letter-spacing: 4px;
+    color: #eef5ff;
+
+    text-shadow:
+        0 0 24px rgba(114, 215, 255, 0.18);
 }
 
-.upgrade-subtitle {
-    color: var(--muted);
+.upgrade-panel .subtitle {
+    margin-bottom: 8px;
 
-    margin: 8px 0 28px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+
+    color: #72d7ff;
 }
-
-
-/* =========================================================
-   SCRAP DISPLAY
-========================================================= */
 
 .upgrade-scrap {
     display: inline-flex;
-
     align-items: center;
-    gap: 10px;
+    gap: 9px;
 
-    margin: 15px auto;
+    margin: 4px 0 10px;
+    padding: 8px 15px;
 
-    padding: 8px 16px;
-
-    border: 1px solid rgba(114,215,255,0.25);
-
-    border-radius: 999px;
-
-    background: rgba(114,215,255,0.06);
-
-    color: var(--muted);
-
+    font-family: "Orbitron", sans-serif;
     font-size: 12px;
+    letter-spacing: 0.14em;
 
-    font-weight: 700;
+    color: #8b9ab0;
 
-    letter-spacing: 2px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
 }
 
 .upgrade-scrap span {
-    color: var(--accent);
+    color: #72d7ff;
+    font-weight: 700;
 
-    font-size: 16px;
+    text-shadow:
+        0 0 12px rgba(114, 215, 255, 0.45);
+}
 
-    letter-spacing: 0;
+.upgrade-subtitle {
+    margin: 8px 0 28px;
+
+    font-family: "Montserrat", sans-serif;
+    font-size: 13px;
+
+    color: #71809a;
 }
 
 
@@ -543,149 +580,25 @@ button:active {
 ========================================================= */
 
 .upgrade-options {
-
     display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 18px;
-
-    margin-top: 25px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
 }
 
-
-.upgrade-card {
-
-    position: relative;
-
-    min-height: 240px;
-
-    padding: 28px 20px;
-
-    border:
-        1px solid
-        rgba(255,255,255,0.12);
-
-    border-radius: 20px;
-
-    background:
-        rgba(255,255,255,0.045);
-
-    color: var(--text);
-
-    cursor: pointer;
-
-    font-family: inherit;
-
-    transition:
-        transform 0.2s ease,
-        border-color 0.2s ease,
-        background 0.2s ease,
-        box-shadow 0.2s ease;
+.upgrade-options > * {
+    animation: upgradeCardIn 0.5s cubic-bezier(.22, 1, .36, 1) both;
 }
 
-
-.upgrade-card:hover {
-
-    transform:
-        translateY(-7px);
-
-    border-color:
-        var(--accent);
-
-    background:
-        rgba(114,215,255,0.07);
-
-    box-shadow:
-        0 15px 40px
-        rgba(0,0,0,0.25);
+.upgrade-options > *:nth-child(1) {
+    animation-delay: 0.08s;
 }
 
-
-.upgrade-icon {
-
-    width: 55px;
-    height: 55px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    margin: 0 auto 18px;
-
-    border:
-        1px solid
-        rgba(114,215,255,0.3);
-
-    border-radius: 50%;
-
-    color: var(--accent);
-
-    font-size: 24px;
-
-    background:
-        rgba(114,215,255,0.06);
+.upgrade-options > *:nth-child(2) {
+    animation-delay: 0.16s;
 }
 
-
-.upgrade-title {
-
-    font-size: 15px;
-
-    font-weight: 700;
-
-    letter-spacing: 2px;
-
-    margin-bottom: 8px;
-}
-
-
-.upgrade-tier {
-
-    color: var(--accent);
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    letter-spacing: 2px;
-
-    margin-bottom: 18px;
-}
-
-
-.upgrade-description {
-
-    color: var(--muted);
-
-    font-size: 13px;
-
-    line-height: 1.5;
-
-    margin-bottom: 22px;
-}
-
-
-.upgrade-cost {
-
-    display: inline-block;
-
-    padding: 7px 12px;
-
-    border-radius: 999px;
-
-    background:
-        rgba(255,255,255,0.06);
-
-    color: var(--text);
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
+.upgrade-options > *:nth-child(3) {
+    animation-delay: 0.24s;
 }
 
 
@@ -694,50 +607,109 @@ button:active {
 ========================================================= */
 
 .upgrade-continue {
-
     margin-top: 28px;
 }
 
-
 #continue-button {
+    min-width: 230px;
 
-    padding:
-        13px 28px;
+    padding: 12px 22px;
 
-    border:
-        1px solid
-        rgba(114,215,255,0.35);
+    font-family: "Montserrat", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
 
-    border-radius: 999px;
+    color: #dff7ff;
 
     background:
-        rgba(114,215,255,0.08);
+        linear-gradient(
+            135deg,
+            rgba(114, 215, 255, 0.13),
+            rgba(114, 215, 255, 0.045)
+        );
 
-    color: var(--accent);
-
-    font-family: inherit;
-
-    font-weight: 700;
-
-    letter-spacing: 2px;
+    border: 1px solid rgba(114, 215, 255, 0.25);
+    border-radius: 999px;
 
     cursor: pointer;
 
     transition:
+        transform 0.2s ease,
         background 0.2s ease,
-        transform 0.2s ease;
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
-
 
 #continue-button:hover {
+    transform: translateY(-2px);
 
     background:
-        rgba(114,215,255,0.15);
+        linear-gradient(
+            135deg,
+            rgba(114, 215, 255, 0.2),
+            rgba(114, 215, 255, 0.07)
+        );
 
-    transform:
-        translateY(-2px);
+    border-color: rgba(114, 215, 255, 0.5);
+
+    box-shadow:
+        0 0 24px rgba(114, 215, 255, 0.12);
 }
 
+#continue-button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes upgradePanelIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+}
+
+@keyframes upgradeCardIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .upgrade-panel {
+        padding: 30px 20px 26px;
+    }
+
+    .upgrade-options {
+        grid-template-columns: 1fr;
+    }
+
+}
 /* =========================================================
    VOID RING UPGRADE
 ========================================================= */
