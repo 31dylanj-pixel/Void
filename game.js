@@ -840,12 +840,12 @@ function roomIsComplete() {
 function getEnemyCap() {
 
     if (depth === 10) {
-        return 25;
+        return 30;
     }
 
     return Math.min(
-        12 + depth * 2,
-        30
+        18 + depth * 2,
+        40
     );
 
 }
