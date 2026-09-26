@@ -3262,7 +3262,7 @@ function drawEnemies() {
              enemy.type === "voidling" ||
              enemy.type === "boss" ||
              enemy.type === "halo"
-         )
+         ) {
 
             const ringRadius =
                 enemy.radius *
