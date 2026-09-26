@@ -24,14 +24,14 @@ resizeCanvas();
    GAME CONFIG
 ========================================================= */
 
-const MAX_ROOMS = 10;
+const MAX_ROOMS = 15;
 
 /*
     Total number of enemies that must
     spawn and be defeated to clear each room.
 */
 const ROOM_ENEMIES = [
-    57,
+    30,
     63,
     70,
     77,
@@ -40,14 +40,19 @@ const ROOM_ENEMIES = [
     110,
     125,
     145,
-    170
+    170,
+    200,
+    230,
+    260,
+    290,
+    320
 ];
 
-/* =========================================================
-   ENEMY TYPES
-========================================================= */
-
 const ENEMY_TYPES = {
+
+    /* =====================================================
+       CRAWLER
+    ===================================================== */
 
     crawler: {
         name: "CRAWLER",
@@ -55,7 +60,7 @@ const ENEMY_TYPES = {
         radius: 15,
 
         health: depth =>
-            (45 + depth * 12) * 2,
+            (45 + depth * 12) * 3,
 
         speed: depth =>
             70 + depth * 8,
@@ -67,13 +72,17 @@ const ENEMY_TYPES = {
     },
 
 
+    /* =====================================================
+       SPLITTER
+    ===================================================== */
+
     splitter: {
         name: "SPLITTER",
         color: "#ff8a3d",
         radius: 45,
 
         health: depth =>
-            (260 + depth * 28) * 2,
+            (260 + depth * 28) * 3,
 
         speed: depth =>
             48 + depth * 4,
@@ -85,13 +94,17 @@ const ENEMY_TYPES = {
     },
 
 
+    /* =====================================================
+       GUNNER
+    ===================================================== */
+
     gunner: {
         name: "GUNNER",
         color: "#b8ff3d",
         radius: 22.5,
 
         health: depth =>
-            (180 + depth * 20) * 2,
+            (180 + depth * 20) * 3,
 
         speed: depth =>
             52 + depth * 5,
@@ -103,13 +116,17 @@ const ENEMY_TYPES = {
     },
 
 
+    /* =====================================================
+       VOIDLING
+    ===================================================== */
+
     voidling: {
         name: "VOIDLING",
         color: "#a855f7",
         radius: 37.5,
 
         health: depth =>
-            (360 + depth * 35) * 2,
+            (360 + depth * 35) * 3,
 
         speed: depth =>
             42 + depth * 4,
@@ -121,13 +138,17 @@ const ENEMY_TYPES = {
     },
 
 
+    /* =====================================================
+       STALKER
+    ===================================================== */
+
     stalker: {
         name: "STALKER",
         color: "#ffe44d",
         radius: 30,
 
         health: depth =>
-            (250 + depth * 25) * 2,
+            (250 + depth * 25) * 3,
 
         speed: depth =>
             (70 + depth * 8) * 2,
@@ -139,13 +160,17 @@ const ENEMY_TYPES = {
     },
 
 
+    /* =====================================================
+       VOID TITAN
+    ===================================================== */
+
     boss: {
         name: "VOID TITAN",
         color: "#e8f4ff",
         radius: 90,
 
         health: depth =>
-            6500 * 2,
+            6500 * 3,
 
         speed: depth =>
             34,
@@ -154,6 +179,94 @@ const ENEMY_TYPES = {
             45,
 
         ability: "VOID RING + 8 TURRETS"
+    },
+
+
+    /* =====================================================
+       [SHINY] CRAWLER
+    ===================================================== */
+
+    shinyCrawler: {
+        name: "[SHINY] CRAWLER",
+        color: "#ff5577",
+        radius: 15 * 2,
+
+        health: depth =>
+            ENEMY_TYPES.crawler.health(depth) * 3,
+
+        speed: depth =>
+            70 + depth * 8,
+
+        damage: depth =>
+            15 + depth * 2,
+
+        ability: "SPLITS INTO 7 CRAWLERS"
+    },
+
+
+    /* =====================================================
+       [SHINY] SPLITTER
+    ===================================================== */
+
+    shinySplitter: {
+        name: "[SHINY] SPLITTER",
+        color: "#ff8a3d",
+        radius: 45 * 2,
+
+        health: depth =>
+            ENEMY_TYPES.splitter.health(depth) * 3,
+
+        speed: depth =>
+            48 + depth * 4,
+
+        damage: depth =>
+            25 + depth * 2,
+
+        ability: "SPLITS INTO 3 SPLITTERS"
+    },
+
+
+    /* =====================================================
+       HALO
+    ===================================================== */
+
+    halo: {
+        name: "HALO",
+        color: "#72d7ff",
+        radius: 15 * 5,
+
+        health: depth =>
+            ENEMY_TYPES.crawler.health(depth) * 15,
+
+        speed: depth =>
+            40 + depth * 3,
+
+        damage: depth =>
+            30 + depth * 2,
+
+        ability: "3-SHOT TURRET + VOID RING"
+    },
+
+
+    /* =====================================================
+       [SHINY] GUNNER
+    ===================================================== */
+
+    shinyGunner: {
+        name: "[SHINY] GUNNER",
+        color: "#b8ff3d",
+        radius: 22.5 * 2.5,
+
+        health: depth =>
+            ENEMY_TYPES.gunner.health(depth) * 3,
+
+        speed: depth =>
+            52 + depth * 5,
+
+        damage: depth =>
+            20 + depth * 2,
+
+        ability: "5-SHOT TURRET + SPLITS INTO 3 GUNNERS"
     }
 
 };
@@ -859,17 +972,193 @@ function getSpawnDelay() {
 
 }
 
-/* =========================================================
-   ENEMY SELECTION
-========================================================= */
-
 function getEnemyTypeForRoom() {
 
-    /*
-        ROOM 10
-        Every normal enemy type can spawn,
-        but the VOID TITAN is ALWAYS last.
-    */
+    /* =====================================================
+       ROOM 15
+       ALL CURRENT ENEMIES + SHINY GUNNER
+    ===================================================== */
+
+    if (depth === 15) {
+
+        const roll = Math.random();
+
+        if (roll < 0.10) {
+            return "shinyGunner";
+        }
+
+        if (roll < 0.22) {
+            return "halo";
+        }
+
+        if (roll < 0.34) {
+            return "shinySplitter";
+        }
+
+        if (roll < 0.46) {
+            return "shinyCrawler";
+        }
+
+        if (roll < 0.58) {
+            return "stalker";
+        }
+
+        if (roll < 0.68) {
+            return "voidling";
+        }
+
+        if (roll < 0.78) {
+            return "gunner";
+        }
+
+        if (roll < 0.88) {
+            return "splitter";
+        }
+
+        return "splitter";
+    }
+
+
+    /* =====================================================
+       ROOM 14
+       HALO + SHINY ENEMIES
+    ===================================================== */
+
+    if (depth === 14) {
+
+        const roll = Math.random();
+
+        if (roll < 0.10) {
+            return "halo";
+        }
+
+        if (roll < 0.22) {
+            return "shinySplitter";
+        }
+
+        if (roll < 0.34) {
+            return "shinyCrawler";
+        }
+
+        if (roll < 0.47) {
+            return "stalker";
+        }
+
+        if (roll < 0.59) {
+            return "voidling";
+        }
+
+        if (roll < 0.72) {
+            return "gunner";
+        }
+
+        return "splitter";
+    }
+
+
+    /* =====================================================
+       ROOM 13
+       HALO INTRODUCED
+    ===================================================== */
+
+    if (depth === 13) {
+
+        const roll = Math.random();
+
+        if (roll < 0.12) {
+            return "halo";
+        }
+
+        if (roll < 0.27) {
+            return "shinySplitter";
+        }
+
+        if (roll < 0.42) {
+            return "shinyCrawler";
+        }
+
+        if (roll < 0.57) {
+            return "stalker";
+        }
+
+        if (roll < 0.70) {
+            return "voidling";
+        }
+
+        if (roll < 0.83) {
+            return "gunner";
+        }
+
+        return "splitter";
+    }
+
+
+    /* =====================================================
+       ROOM 12
+       SHINY SPLITTER INTRODUCED
+    ===================================================== */
+
+    if (depth === 12) {
+
+        const roll = Math.random();
+
+        if (roll < 0.15) {
+            return "shinySplitter";
+        }
+
+        if (roll < 0.30) {
+            return "shinyCrawler";
+        }
+
+        if (roll < 0.45) {
+            return "stalker";
+        }
+
+        if (roll < 0.58) {
+            return "voidling";
+        }
+
+        if (roll < 0.72) {
+            return "gunner";
+        }
+
+        return "splitter";
+    }
+
+
+    /* =====================================================
+       ROOM 11
+       SHINY CRAWLER INTRODUCED
+    ===================================================== */
+
+    if (depth === 11) {
+
+        const roll = Math.random();
+
+        if (roll < 0.20) {
+            return "shinyCrawler";
+        }
+
+        if (roll < 0.36) {
+            return "stalker";
+        }
+
+        if (roll < 0.50) {
+            return "voidling";
+        }
+
+        if (roll < 0.65) {
+            return "gunner";
+        }
+
+        return "splitter";
+    }
+
+
+    /* =====================================================
+       ROOM 10
+       VOID TITAN IS ALWAYS LAST
+    ===================================================== */
 
     if (depth === 10) {
 
@@ -880,8 +1169,7 @@ function getEnemyTypeForRoom() {
             return "boss";
         }
 
-        const roll =
-            Math.random();
+        const roll = Math.random();
 
         if (roll < 0.20) {
             return "stalker";
@@ -903,41 +1191,27 @@ function getEnemyTypeForRoom() {
     }
 
 
-    /*
-        ROOMS 1–2
-    */
+    /* =====================================================
+       ROOMS 9
+    ===================================================== */
 
-    if (depth < 3) {
-        return "crawler";
-    }
+    if (depth === 9) {
 
+        const roll = Math.random();
 
-    /*
-        ROOMS 3–4
-    */
+        if (roll < 0.10) {
+            return "stalker";
+        }
 
-    if (depth < 5) {
+        if (roll < 0.18) {
+            return "voidling";
+        }
 
-        return Math.random() < 0.20
-            ? "splitter"
-            : "crawler";
-    }
-
-
-    /*
-        ROOMS 5–6
-    */
-
-    if (depth < 7) {
-
-        const roll =
-            Math.random();
-
-        if (roll < 0.12) {
+        if (roll < 0.30) {
             return "gunner";
         }
 
-        if (roll < 0.27) {
+        if (roll < 0.43) {
             return "splitter";
         }
 
@@ -945,14 +1219,13 @@ function getEnemyTypeForRoom() {
     }
 
 
-    /*
-        ROOMS 7–8
-    */
+    /* =====================================================
+       ROOMS 7–8
+    ===================================================== */
 
-    if (depth < 9) {
+    if (depth >= 7) {
 
-        const roll =
-            Math.random();
+        const roll = Math.random();
 
         if (roll < 0.08) {
             return "voidling";
@@ -970,28 +1243,41 @@ function getEnemyTypeForRoom() {
     }
 
 
-    /*
-        ROOM 9
-    */
+    /* =====================================================
+       ROOMS 5–6
+    ===================================================== */
 
-    const roll =
-        Math.random();
+    if (depth >= 5) {
 
-    if (roll < 0.10) {
-        return "stalker";
+        const roll = Math.random();
+
+        if (roll < 0.12) {
+            return "gunner";
+        }
+
+        if (roll < 0.27) {
+            return "splitter";
+        }
+
+        return "crawler";
     }
 
-    if (roll < 0.18) {
-        return "voidling";
+
+    /* =====================================================
+       ROOMS 3–4
+    ===================================================== */
+
+    if (depth >= 3) {
+
+        return Math.random() < 0.20
+            ? "splitter"
+            : "crawler";
     }
 
-    if (roll < 0.30) {
-        return "gunner";
-    }
 
-    if (roll < 0.43) {
-        return "splitter";
-    }
+    /* =====================================================
+       ROOMS 1–2
+    ===================================================== */
 
     return "crawler";
 }
@@ -1502,7 +1788,118 @@ function updateEnemyWeapons(enemy, dt) {
         }
     }
 
+   /* =====================================================
+      HALO
+      3 bullets every 0.25 seconds
+   ===================================================== */
+   
+   if (enemy.type === "halo") {
+   
+       enemy.shootCooldown -= dt;
+   
+       if (enemy.shootCooldown <= 0) {
+   
+           const baseAngle =
+               Math.atan2(
+                   player.y - enemy.y,
+                   player.x - enemy.x
+               );
+   
+           const spread = 0.12;
+   
+           for (let i = 0; i < 3; i++) {
+   
+               const angle =
+                   baseAngle +
+                   (i - 1) * spread;
+   
+               fireEnemyBullet(
+                   enemy.x,
+                   enemy.y,
+                   angle,
+                   280,
+                   10
+               );
+           }
+   
+           enemy.shootCooldown = 0.25;
+       }
+   
+   
+       /* HALO VOID RING */
+   
+       enemy.ringCooldown -= dt;
+   
+       if (enemy.ringCooldown <= 0) {
+   
+           enemy.ringCooldown = 0.30;
+   
+           const dx =
+               player.x - enemy.x;
+   
+           const dy =
+               player.y - enemy.y;
+   
+           const distance =
+               Math.sqrt(
+                   dx * dx +
+                   dy * dy
+               );
+   
+           const ringRadius =
+               enemy.radius * 1.5;
+   
+           if (distance < ringRadius) {
+   
+               player.health -= 10;
+   
+               if (player.health <= 0) {
+   
+                   player.health = 0;
+   
+                   finishGame();
+               }
+           }
+       }
+   }
 
+   /* =====================================================
+      [SHINY] GUNNER
+      5 bullets every 0.20 seconds
+   ===================================================== */
+   
+   if (enemy.type === "shinyGunner") {
+   
+       enemy.shootCooldown -= dt;
+   
+       if (enemy.shootCooldown <= 0) {
+   
+           const baseAngle =
+               Math.atan2(
+                   player.y - enemy.y,
+                   player.x - enemy.x
+               );
+   
+           const spread = 0.10;
+   
+           for (let i = 0; i < 5; i++) {
+   
+               const angle =
+                   baseAngle +
+                   (i - 2) * spread;
+   
+               fireEnemyBullet(
+                   enemy.x,
+                   enemy.y,
+                   angle,
+                   300,
+                   11
+               );
+           }
+   
+           enemy.shootCooldown = 0.20;
+       }
+   }
     /*
         VOID TITAN
         Eight independently aimed turrets.
@@ -1844,65 +2241,260 @@ function killEnemy(index) {
         the room can finish.
     */
 
-    if (
-        enemy.type === "splitter"
-    ) {
-
-        for (
-            let i = 0;
-            i < 5;
-            i++
-        ) {
-
-            const angle =
-                i *
-                (Math.PI * 2 / 5);
-
-            const distance = 55;
-
-            const health =
-                ENEMY_TYPES.crawler
-                .health(depth);
-
-            enemies.push({
-
-                type: "crawler",
-
-                x:
-                    enemy.x +
-                    Math.cos(angle) *
-                    distance,
-
-                y:
-                    enemy.y +
-                    Math.sin(angle) *
-                    distance,
-
-                radius:
-                    ENEMY_TYPES.crawler.radius,
-
-                health,
-
-                maxHealth:
-                    health,
-
-                speed:
-                    ENEMY_TYPES.crawler
-                    .speed(depth),
-
-                damage:
-                    ENEMY_TYPES.crawler
-                    .damage(depth),
-
-                shootCooldown: 0,
-
-                ringCooldown: 0,
-
-                turretAngles: null
-
-            });
-        }
-    }
+    /* =====================================================
+      SPLITTER
+      5 CRAWLERS
+   ===================================================== */
+   
+   if (
+       enemy.type === "splitter"
+   ) {
+   
+       for (
+           let i = 0;
+           i < 5;
+           i++
+       ) {
+   
+           const angle =
+               i *
+               (Math.PI * 2 / 5);
+   
+           const distance = 55;
+   
+           const health =
+               ENEMY_TYPES.crawler
+                   .health(depth);
+   
+           enemies.push({
+   
+               type: "crawler",
+   
+               x:
+                   enemy.x +
+                   Math.cos(angle) *
+                   distance,
+   
+               y:
+                   enemy.y +
+                   Math.sin(angle) *
+                   distance,
+   
+               radius:
+                   ENEMY_TYPES.crawler.radius,
+   
+               health,
+   
+               maxHealth:
+                   health,
+   
+               speed:
+                   ENEMY_TYPES.crawler
+                       .speed(depth),
+   
+               damage:
+                   ENEMY_TYPES.crawler
+                       .damage(depth),
+   
+               shootCooldown: 0,
+               ringCooldown: 0,
+               turretAngles: null
+   
+           });
+       }
+   }
+   
+   
+   /* =====================================================
+      [SHINY] CRAWLER
+      7 CRAWLERS
+   ===================================================== */
+   
+   if (
+       enemy.type === "shinyCrawler"
+   ) {
+   
+       for (
+           let i = 0;
+           i < 7;
+           i++
+       ) {
+   
+           const angle =
+               i *
+               (Math.PI * 2 / 7);
+   
+           const distance = 70;
+   
+           const health =
+               ENEMY_TYPES.crawler
+                   .health(depth);
+   
+           enemies.push({
+   
+               type: "crawler",
+   
+               x:
+                   enemy.x +
+                   Math.cos(angle) *
+                   distance,
+   
+               y:
+                   enemy.y +
+                   Math.sin(angle) *
+                   distance,
+   
+               radius:
+                   ENEMY_TYPES.crawler.radius,
+   
+               health,
+   
+               maxHealth:
+                   health,
+   
+               speed:
+                   ENEMY_TYPES.crawler
+                       .speed(depth),
+   
+               damage:
+                   ENEMY_TYPES.crawler
+                       .damage(depth),
+   
+               shootCooldown: 0,
+               ringCooldown: 0,
+               turretAngles: null
+   
+           });
+       }
+   }
+   
+   
+   /* =====================================================
+      [SHINY] SPLITTER
+      3 SPLITTERS
+   ===================================================== */
+   
+   if (
+       enemy.type === "shinySplitter"
+   ) {
+   
+       for (
+           let i = 0;
+           i < 3;
+           i++
+       ) {
+   
+           const angle =
+               i *
+               (Math.PI * 2 / 3);
+   
+           const distance = 110;
+   
+           const health =
+               ENEMY_TYPES.splitter
+                   .health(depth);
+   
+           enemies.push({
+   
+               type: "splitter",
+   
+               x:
+                   enemy.x +
+                   Math.cos(angle) *
+                   distance,
+   
+               y:
+                   enemy.y +
+                   Math.sin(angle) *
+                   distance,
+   
+               radius:
+                   ENEMY_TYPES.splitter.radius,
+   
+               health,
+   
+               maxHealth:
+                   health,
+   
+               speed:
+                   ENEMY_TYPES.splitter
+                       .speed(depth),
+   
+               damage:
+                   ENEMY_TYPES.splitter
+                       .damage(depth),
+   
+               shootCooldown: 0,
+               ringCooldown: 0,
+               turretAngles: null
+   
+           });
+       }
+   }
+   
+   
+   /* =====================================================
+      [SHINY] GUNNER
+      3 GUNNERS
+   ===================================================== */
+   
+   if (
+       enemy.type === "shinyGunner"
+   ) {
+   
+       for (
+           let i = 0;
+           i < 3;
+           i++
+       ) {
+   
+           const angle =
+               i *
+               (Math.PI * 2 / 3);
+   
+           const distance = 90;
+   
+           const health =
+               ENEMY_TYPES.gunner
+                   .health(depth);
+   
+           enemies.push({
+   
+               type: "gunner",
+   
+               x:
+                   enemy.x +
+                   Math.cos(angle) *
+                   distance,
+   
+               y:
+                   enemy.y +
+                   Math.sin(angle) *
+                   distance,
+   
+               radius:
+                   ENEMY_TYPES.gunner.radius,
+   
+               health,
+   
+               maxHealth:
+                   health,
+   
+               speed:
+                   ENEMY_TYPES.gunner
+                       .speed(depth),
+   
+               damage:
+                   ENEMY_TYPES.gunner
+                       .damage(depth),
+   
+               shootCooldown: 0,
+               ringCooldown: 0,
+               turretAngles: null
+   
+           });
+       }
+   }
 
 
     enemies.splice(
@@ -2667,9 +3259,10 @@ function drawEnemies() {
         */
 
         if (
-            enemy.type === "voidling" ||
-            enemy.type === "boss"
-        ) {
+             enemy.type === "voidling" ||
+             enemy.type === "boss" ||
+             enemy.type === "halo"
+         )
 
             const ringRadius =
                 enemy.radius *
@@ -2688,9 +3281,10 @@ function drawEnemies() {
 
             ctx.strokeStyle =
                 enemy.type === "boss"
-                    ? "rgba(114, 215, 255, 0.45)"
-                    : "rgba(168, 85, 247, 0.40)";
-
+                   ? "rgba(114, 215, 255, 0.45)"
+                   : enemy.type === "halo"
+                       ? "rgba(114, 215, 255, 0.40)"
+                       : "rgba(168, 85, 247, 0.40)";
             ctx.lineWidth =
                 3 / scale;
 
@@ -2744,8 +3338,71 @@ function drawEnemies() {
                                 ? "rgba(255, 138, 61, 0.09)"
                                 : "rgba(255, 85, 119, 0.08)";
 
-        ctx.fill();
+      ctx.fill();
 
+        /* =====================================================
+         SHINY GLINT
+      ===================================================== */
+      
+      if (
+          enemy.type === "shinyCrawler" ||
+          enemy.type === "shinySplitter" ||
+          enemy.type === "shinyGunner"
+      ) {
+      
+          const glint =
+              Math.sin(
+                  performance.now() * 0.006
+              );
+      
+          const glintX =
+              enemy.x +
+              Math.cos(
+                  -0.7
+              ) *
+              radius *
+              0.55;
+      
+          const glintY =
+              enemy.y +
+              Math.sin(
+                  -0.7
+              ) *
+              radius *
+              0.55;
+      
+          ctx.globalAlpha =
+              0.35 +
+              glint * 0.25;
+      
+          ctx.beginPath();
+      
+          ctx.arc(
+              glintX,
+              glintY,
+              Math.max(
+                  3,
+                  radius * 0.12
+              ),
+              0,
+              Math.PI * 2
+          );
+      
+          ctx.fillStyle =
+              "#ffffff";
+      
+          ctx.shadowBlur =
+              14;
+      
+          ctx.shadowColor =
+              "#ffffff";
+      
+          ctx.fill();
+      
+          ctx.shadowBlur = 0;
+      
+          ctx.globalAlpha = 1;
+      }
 
         /*
             MAIN BODY
