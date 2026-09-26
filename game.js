@@ -638,7 +638,35 @@ const enemyIntroductions = {
         title: "CRITICAL THREAT",
         health: "6,500",
         ability: "Void Ring + 8 rapid-fire turrets."
-    }
+    },
+
+    11: {
+       type: "shinyCrawler",
+       title: "NEW THREAT",
+       health: "3× CRAWLER",
+       ability: "Splits into 7 Crawlers."
+   },
+   
+   12: {
+       type: "shinySplitter",
+       title: "NEW THREAT",
+       health: "3× SPLITTER",
+       ability: "Splits into 3 Splitters."
+   },
+   
+   13: {
+       type: "halo",
+       title: "ELITE THREAT",
+       health: "15× CRAWLER",
+       ability: "3-shot turret + Void Ring."
+   },
+   
+   15: {
+       type: "shinyGunner",
+       title: "NEW THREAT",
+       health: "3× GUNNER",
+       ability: "5-shot turret + splits into 3 Gunners."
+   }
 
 };
 
@@ -1065,7 +1093,7 @@ function getEnemyTypeForRoom() {
 
         const roll = Math.random();
 
-        if (roll < 0.12) {
+        if (roll < 0.5) {
             return "halo";
         }
 
@@ -1155,40 +1183,26 @@ function getEnemyTypeForRoom() {
     }
 
 
-    /* =====================================================
-       ROOM 10
-       VOID TITAN IS ALWAYS LAST
-    ===================================================== */
-
-    if (depth === 10) {
-
-        if (
-            roomSpawned ===
-            roomEnemiesRequired - 1
-        ) {
-            return "boss";
-        }
-
-        const roll = Math.random();
-
-        if (roll < 0.20) {
-            return "stalker";
-        }
-
-        if (roll < 0.38) {
-            return "voidling";
-        }
-
-        if (roll < 0.56) {
-            return "gunner";
-        }
-
-        if (roll < 0.72) {
-            return "splitter";
-        }
-
-        return "crawler";
-    }
+    /* =========================================================
+      ROOM 10 — BOSS
+   ========================================================= */
+   
+   if (depth === 10) {
+   
+       // Spawn the Void Titan around the middle of the room
+       if (roomSpawned === 64) {
+           return "boss";
+       }
+   
+       const roll = Math.random();
+   
+       if (roll < 0.25) return "stalker";
+       if (roll < 0.50) return "voidling";
+       if (roll < 0.70) return "gunner";
+       if (roll < 0.88) return "splitter";
+   
+       return "crawler";
+   }
 
 
     /* =====================================================
@@ -1317,12 +1331,9 @@ function spawnEnemy() {
         getWorldScale();
 
     const spawnDistance =
-        Math.max(
-            canvas.width,
-            canvas.height
-        ) *
-        0.55 *
-        worldScale;
+       type === "boss"
+           ? Math.max(canvas.width, canvas.height) * 0.35
+           : Math.max(canvas.width, canvas.height) * 0.55 * worldScale;
 
     const center =
         getWorldCenter();
