@@ -2,172 +2,68 @@
 
 > Descend. Survive. Adapt.
 
-VOID is a browser-based top-down roguelite built with HTML, CSS, and JavaScript.
+VOID is a browser-based top-down sci-fi roguelite set inside an unknown underground facility. Fight through 15 increasingly dangerous rooms, gather scrap, build upgrades, and try to reach the bottom.
 
-You wake up inside an endless underground facility with no clear explanation of how you got there. Each room becomes more dangerous as you descend. Fight enemies, collect scrap, upgrade your equipment, and keep moving deeper.
+## Run the game
 
----
-
-## Gameplay
-
-VOID is built around a simple loop:
-
-1. Enter a room
-2. Fight enemies
-3. Collect scrap
-4. Choose upgrades
-5. Enter the next room
-6. Survive increasingly difficult encounters
-7. Reach the bottom
-
-Enemies that collide with the player damage them but do not count toward the room's required kills.
-
----
-
-## Features
-
-- Top-down canvas-based gameplay
-- WASD movement
-- Mouse aiming
-- Click to fire
-- Multiple projectiles
-- Increasing enemy difficulty
-- Scrap currency
-- Upgrade system
-- Upgrade tiers
-- Increasing upgrade costs
-- Void Ring ability
-- 10 progressively harder rooms
-- Increasing enemy counts
-- Expanding-feeling arenas
-- Room transition screens
-- Health system
-- Particle effects
-- Dark sci-fi interface
-- Responsive fullscreen canvas
-
----
-
-## Rooms
-
-The current room requirements are:
-
-| Room | Required Kills |
-|------|----------------|
-| 1 | 12 |
-| 2 | 18 |
-| 3 | 25 |
-| 4 | 32 |
-| 5 | 40 |
-| 6 | 50 |
-| 7 | 65 |
-| 8 | 80 |
-| 9 | 100 |
-| 10 | 125 |
-
-Later rooms increase both the number and difficulty of enemies.
-
----
+Serve the folder from GitHub Pages or another static web server. The Three.js renderer needs a browser with WebGL and an internet connection because it loads the pinned Three.js 0.160.0 modules from jsDelivr. If WebGL, the CDN, or browser module loading is unavailable (for example, when opened directly as a `file://` page), the game automatically falls back to its original 2D canvas renderer.
 
 ## Controls
 
 | Control | Action |
-|---------|--------|
-| W | Move up |
-| A | Move left |
-| S | Move down |
-| D | Move right |
+| --- | --- |
+| W, A, S, D | Move |
 | Mouse | Aim |
-| Left Click | Fire |
+| Hold left click | Fire |
+| Space or Shift | Dash through danger; briefly invulnerable |
+| P or Escape | Pause and resume |
+
+Sound effects and music are generated in the browser (no audio files) and can be toggled in Settings.
 | R | Restart after death |
 
----
+## Run loop
 
-## Upgrade System
+1. Enter a room and defeat its enemies.
+2. Collect scrap, pickups, and kill-combo points.
+3. Choose equipment upgrades at the station.
+4. Descend into the next room. Enemy types and pressure increase with depth.
 
-Scrap can be spent at the upgrade station between rooms.
+The run ends on death or after room 15. Best score, deepest room, and total kills are saved in the browser when storage is available.
 
-### Core
-Increases maximum health by 20%.
+## Pickups
 
-### Thrust
-Increases movement speed by 10%.
+| Pickup | Effect |
+| --- | --- |
+| Repair | Restores up to 25% of maximum health |
+| Overclock | Increases firing speed for 8 seconds |
+| Shield | Adds temporary damage-absorbing shield |
+| Pulse | Damages nearby enemies and clears nearby enemy bullets |
 
-### Weapon
-Increases weapon damage by 15%.
+Enemies can drop pickups. More dangerous enemies are more likely to drop them. Pickups drift toward a nearby player and expire if left behind.
 
-### Overdrive
-Increases firing speed by 10%.
+## Upgrades
 
-### Velocity
-Increases projectile speed by 15%.
+The existing Core, Thrust, Weapon, Overdrive, Velocity, Split Round, Explosive Bullets, and Void Ring upgrades remain. Two new upgrades are available:
 
-### Split Round
-Adds an additional projectile.
+- **Nano Repair** — restores health over time after you avoid damage for a short period.
+- **Dash Core** — reduces the dash cooldown.
 
-### Void Ring
-Creates a damaging ring around the player.
+## Main menu and settings
 
-Each upgrade has tiers, and upgrade costs increase as the tier increases.
+The menu includes a field manual, settings, and saved run records. Settings include bloom/glow, screen shake, damage numbers, 3D graphics, and low-quality rendering. These preferences save between visits. Press P or Escape to pause a run; the pause screen can resume, restart, or return to the main menu.
 
----
+## Graphics and fonts
 
-## Void Ring
+The optional Three.js renderer draws a perspective-lit grid arena, floating dust, a procedural black-hole menu scene, geometric enemy models, glowing pickups, particles, and bloom/vignette post-processing. It uses no external art assets. The original 2D canvas renderer remains available in settings as a fallback.
 
-The Void Ring surrounds the player and damages enemies that enter its radius.
+- **Orbitron** — headings, buttons, and HUD labels.
+- **EB Garamond** — body copy and longer descriptions.
 
-Each successive Void Ring upgrade increases:
+Both fonts are loaded from Google Fonts; system fallbacks are included.
 
-- Damage
-- Ring size
+## Files
 
-The ability becomes increasingly useful as enemy numbers increase.
-
----
-
-## Room Scaling
-
-As the player descends, the game world gradually becomes larger.
-
-Instead of changing the physical browser canvas, the game scales the world so that:
-
-- The player appears slightly smaller
-- Enemies appear slightly smaller
-- The grid spacing increases
-- More movement space is available
-- The Void Ring scales with the world
-
-This makes later rooms feel more open without requiring the browser window to change size.
-
----
-
-## Technology
-
-VOID is built using:
-
-- HTML5
-- CSS3
-- JavaScript
-- HTML Canvas
-- Google Fonts
-
-### Fonts
-
-The interface uses:
-
-- **Montserrat** for general UI and headings
-- **Orbitron** for futuristic HUD elements and system labels
-
-Orbitron is a geometric sans-serif typeface designed by Matt McInerney and distributed under the SIL Open Font License. 
-
----
-
-## Project Structure
-
-```text
-VOID/
-│
-├── index.html
-├── style.css
-├── game.js
-└── README.md
+- `index.html` — screen layout and font / Three.js imports.
+- `style.css` — interface and menu styling.
+- `game.js` — game logic and the classic 2D renderer.
+- `renderer3d.js` — optional Three.js scene and renderer.
