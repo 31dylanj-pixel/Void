@@ -341,6 +341,9 @@ window.addEventListener("mouseup", e => {
    PLAYER
 ========================================================= */
 
+/* base time between shots (was 0.16s, which melted enemies) */
+const BASE_FIRE_RATE = 0.30;
+
 const player = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -353,7 +356,8 @@ const player = {
     health: 100,
 
     damage: 25,
-    fireRate: 0.16,
+    fireRate: BASE_FIRE_RATE,
+    reloadScale: 1,
     bulletSpeed: 720,
 
     multishot: 1,
@@ -466,6 +470,13 @@ const upgrades = {
         tier: 0
     },
 
+    reload: {
+        name: "QUICK RELOAD",
+        description: "-12% weapon reload time",
+        baseCost: 25,
+        tier: 0
+    },
+
     dashCore: {
         name: "DASH CORE",
         description: "-15% dash cooldown",
@@ -497,7 +508,9 @@ const settings = {
     shake: true,
     numbers: true,
     use3d: true,
-    lowQuality: false
+    lowQuality: false,
+    sfx: true,
+    music: true
 };
 
 const save = {
@@ -711,6 +724,7 @@ function damagePlayer(amount, continuous = false) {
 
     player.health -= amount;
     player.regenDelay = 3;
+    if (window.VoidAudio) VoidAudio.play("hurt");
 
     if (continuous) {
         hitFlash = Math.min(1, hitFlash + amount * 0.5);
@@ -748,6 +762,7 @@ function tryDash(moveX, moveY) {
 
     addEffect(player.x, player.y, 60, "#72d7ff", 0.35);
     addShake(2);
+    if (window.VoidAudio) VoidAudio.play("dash");
 }
 
 function spawnDashTrail() {
@@ -866,12 +881,14 @@ function applyPickup(pickup) {
         pulseBlast();
     }
 
+    if (window.VoidAudio) VoidAudio.play("pickup");
     addEffect(player.x, player.y, 60, info.color, 0.45);
     addFloatText(player.x, player.y - 26, info.label, info.color, 1.4);
 }
 
 function pulseBlast() {
     const radius = 340;
+    if (window.VoidAudio) VoidAudio.play("pulse");
 
     addEffect(player.x, player.y, radius, "#c07bff", 0.7);
     addEffect(player.x, player.y, radius * 0.6, "#ffffff", 0.45);
@@ -1149,6 +1166,12 @@ const menuPanels = {
     settings: document.getElementById("menu-settings")
 };
 
+document.addEventListener("click", e => {
+    if (e.target.closest && e.target.closest("button") && !e.target.closest(".upgrade-card")) {
+        if (window.VoidAudio) VoidAudio.play("click");
+    }
+});
+
 function showMenuPanel(name) {
     for (const key in menuPanels) {
         menuPanels[key].classList.toggle("hidden", key !== name);
@@ -1196,6 +1219,7 @@ document.getElementById("victory-menu-button")
     .addEventListener("click", () => goToMenu());
 
 function goToMenu() {
+    if (window.VoidAudio) VoidAudio.setMode("menu");
     paused = false;
     gameRunning = false;
     gameOver = false;
@@ -1290,10 +1314,15 @@ const settingInputs = {
     shake: "setting-shake",
     numbers: "setting-numbers",
     use3d: "setting-3d",
-    lowQuality: "setting-lowq"
+    lowQuality: "setting-lowq",
+    sfx: "setting-sfx",
+    music: "setting-music"
 };
 
 function applySettings() {
+    if (window.VoidAudio) {
+        VoidAudio.setOptions({ sfx: settings.sfx, music: settings.music });
+    }
     const renderer = window.VoidRenderer;
 
     if (renderer && renderer.setOptions) {
@@ -1639,7 +1668,8 @@ function startGame() {
     player.health = 100;
     player.speed = 270;
     player.damage = 25;
-    player.fireRate = 0.16;
+    player.fireRate = BASE_FIRE_RATE;
+    player.reloadScale = 1;
     player.bulletSpeed = 720;
     player.multishot = 1;
 
@@ -1686,6 +1716,8 @@ function startGame() {
 ========================================================= */
 
 function beginRoom(roomNumber) {
+    if (window.VoidAudio) VoidAudio.play("roomStart");
+    if (window.VoidAudio) VoidAudio.setMode("game");
     roomSpawned = 0;
     depth = roomNumber;
 
@@ -2248,7 +2280,8 @@ function shoot() {
     }
 
     player.shootCooldown =
-        player.fireRate * (rapidTime > 0 ? 0.6 : 1);
+        player.fireRate * player.reloadScale * (rapidTime > 0 ? 0.6 : 1);
+    if (window.VoidAudio) VoidAudio.play("shoot");
 }
 
 
@@ -2349,6 +2382,8 @@ function updatePlayer(dt) {
 ========================================================= */
 
 function createBulletExplosion(x, y) {
+    if (window.VoidAudio) VoidAudio.play("explosion");
+
 
     const explosionRadius =
         explosiveBullets.radius;
@@ -2498,6 +2533,7 @@ function updateBullets(dt) {
                 enemy.health -=
                 bullet.damage;
                 showDamageNumber(enemy, bullet.damage);
+                if (window.VoidAudio) VoidAudio.play("hit");
             
             createHitParticles(
                 enemy.x,
@@ -3016,6 +3052,7 @@ function updateVoidRing(dt) {
 ========================================================= */
 
 function killEnemy(index) {
+    if (window.VoidAudio) VoidAudio.play("kill");
 
     const enemy =
         enemies[index];
@@ -3458,6 +3495,8 @@ function updateParticles(dt) {
 
 function completeRoom() {
     gameRunning = false;
+    if (window.VoidAudio) VoidAudio.play("roomClear");
+    if (window.VoidAudio) VoidAudio.setMode("menu");
 
     score += depth * 100;
     addFloatText(player.x, player.y - 40, `+${depth * 100}`, "#ffd24a", 1.5);
@@ -3513,10 +3552,12 @@ function applyUpgrade(key) {
         getUpgradeCost(upgrade);
 
     if (scrap < cost) {
+        if (window.VoidAudio) VoidAudio.play("deny");
         return;
     }
 
     scrap -= cost;
+    if (window.VoidAudio) VoidAudio.play("upgrade");
 
     upgrade.tier++;
 
@@ -3585,6 +3626,10 @@ function applyUpgrade(key) {
 
         case "regen":
             player.regen += 1.5;
+            break;
+
+        case "reload":
+            player.reloadScale = Math.max(0.35, player.reloadScale * 0.88);
             break;
 
         case "dashCore":
@@ -3678,6 +3723,7 @@ function renderUpgrades() {
         if (key === "explosive") icon = "✹";
         if (key === "voidRing") icon = "◎";
         if (key === "regen") icon = "✚";
+        if (key === "reload") icon = "↻";
         if (key === "dashCore") icon = "⇢";
 
         card.innerHTML = `
@@ -3760,6 +3806,8 @@ function finishGame() {
 
     crosshair.style.display = "none";
 
+    if (window.VoidAudio) VoidAudio.play("death");
+    if (window.VoidAudio) VoidAudio.setMode("menu");
     createExplosion(player.x, player.y, "#72d7ff", 60);
     addEffect(player.x, player.y, 260, "#72d7ff", 0.9);
     addShake(18);
