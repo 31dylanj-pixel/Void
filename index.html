@@ -6,30 +6,34 @@
 
     <title>VOID</title>
 
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23050912'/%3E%3Ccircle cx='32' cy='32' r='15' fill='none' stroke='%2372d7ff' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23a855f7'/%3E%3C/svg%3E">
 
+    <!-- Fonts: Orbitron (headings) + EB Garamond (body text) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Google Fonts -->
-
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-    
-    <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet"
     >
 
     <link rel="stylesheet" href="style.css">
+
+    <!-- Three.js (pinned version). If it can't load, the game falls back to the classic 2D renderer. -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 
 <body>
 
 <main id="game-container">
 
+    <canvas id="gl-canvas"></canvas>
     <canvas id="game-canvas"></canvas>
 
     <!-- ================= HUD ================= -->
@@ -48,6 +52,11 @@
                 <span id="scrap">0</span>
             </div>
 
+            <div class="stat">
+                <span class="label">SCORE</span>
+                <span id="score">0</span>
+            </div>
+
         </div>
 
 
@@ -59,10 +68,20 @@
 
             <div class="progress-wrapper">
 
+                <div class="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+
                 <div class="enemy-counter">
                     <span id="enemy-count">ENEMIES: 0</span>
                 </div>
 
+            </div>
+
+            <div id="combo" class="combo hidden">
+                <span id="combo-count">x1</span>
+                <span class="combo-label">COMBO</span>
+                <div class="combo-bar"><div id="combo-fill"></div></div>
             </div>
 
         </div>
@@ -78,10 +97,23 @@
                 </div>
 
                 <div class="health-bar">
+                    <div id="shield-fill"></div>
                     <div id="health-fill"></div>
                 </div>
 
             </div>
+
+            <div class="dash-container">
+                <div class="health-label">
+                    <span>DASH</span>
+                    <span id="dash-text">READY</span>
+                </div>
+                <div class="health-bar dash-bar">
+                    <div id="dash-fill"></div>
+                </div>
+            </div>
+
+            <div id="powerup-chips" class="powerup-chips"></div>
 
         </div>
 
@@ -96,30 +128,180 @@
     </div>
 
 
-    <!-- ================= START SCREEN ================= -->
+    <!-- ================= START SCREEN / MAIN MENU ================= -->
 
-    <section id="start-screen" class="overlay">
+    <section id="start-screen" class="overlay menu-overlay">
 
-        <div class="title-container">
+        <div class="menu-shell">
 
-            <div class="subtitle">
-                UNKNOWN FACILITY
+            <!-- MAIN -->
+
+            <div class="title-container menu-main" id="menu-main">
+
+                <div class="subtitle">
+                    UNKNOWN FACILITY
+                </div>
+
+                <h1 class="glitch" data-text="VOID">VOID</h1>
+
+                <p class="tagline">
+                    Descend. Survive. Adapt.
+                </p>
+
+                <div class="menu-buttons">
+                    <button id="start-button" class="menu-btn primary">
+                        ENTER THE VOID
+                    </button>
+                    <button id="howto-button" class="menu-btn">
+                        HOW TO PLAY
+                    </button>
+                    <button id="settings-button" class="menu-btn">
+                        SETTINGS
+                    </button>
+                </div>
+
+                <div class="menu-records" id="menu-records">
+                    <div>
+                        <span>BEST SCORE</span>
+                        <strong id="record-score">0</strong>
+                    </div>
+                    <div>
+                        <span>DEEPEST ROOM</span>
+                        <strong id="record-depth">0</strong>
+                    </div>
+                    <div>
+                        <span>TOTAL KILLS</span>
+                        <strong id="record-kills">0</strong>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <span><b>W A S D</b> MOVE</span>
+                    <span><b>MOUSE</b> AIM</span>
+                    <span><b>CLICK</b> FIRE</span>
+                    <span><b>SPACE</b> DASH</span>
+                </div>
+
             </div>
 
-            <h1>VOID</h1>
+            <!-- HOW TO PLAY -->
 
-            <p>
-                Something is waiting at the bottom.
-            </p>
+            <div class="menu-panel hidden" id="menu-howto">
 
-            <button id="start-button">
-                ENTER THE VOID
-            </button>
+                <div class="subtitle">FIELD MANUAL</div>
+                <h2>HOW TO PLAY</h2>
 
-            <div class="controls">
-                <span><b>W A S D</b> MOVE</span>
-                <span><b>MOUSE</b> AIM</span>
-                <span><b>CLICK</b> FIRE</span>
+                <p class="panel-text">
+                    Clear every sector of the facility. Each room spawns a fixed number of enemies &mdash;
+                    destroy them all to unlock the upgrade station, then descend further.
+                    Contact with enemies hurts, so keep moving.
+                </p>
+
+                <div class="manual-grid">
+                    <div><kbd>W A S D</kbd><span>Move</span></div>
+                    <div><kbd>Mouse</kbd><span>Aim</span></div>
+                    <div><kbd>Click</kbd><span>Hold to fire</span></div>
+                    <div><kbd>Space</kbd><span>Dash &mdash; brief invulnerability</span></div>
+                    <div><kbd>P / Esc</kbd><span>Pause</span></div>
+                    <div><kbd>R</kbd><span>Restart after death</span></div>
+                </div>
+
+                <h3>PICKUPS</h3>
+
+                <div class="manual-grid pickups-legend">
+                    <div><i class="dot health"></i><span><b>Repair</b> &mdash; restores health</span></div>
+                    <div><i class="dot rapid"></i><span><b>Overclock</b> &mdash; faster firing</span></div>
+                    <div><i class="dot shield"></i><span><b>Shield</b> &mdash; absorbs damage</span></div>
+                    <div><i class="dot pulse"></i><span><b>Pulse</b> &mdash; blasts nearby enemies</span></div>
+                </div>
+
+                <p class="panel-text">
+                    Chain kills to build a combo multiplier. Take too long between kills and it fades.
+                </p>
+
+                <button class="menu-btn back-btn" data-back>BACK</button>
+
+            </div>
+
+            <!-- SETTINGS -->
+
+            <div class="menu-panel hidden" id="menu-settings">
+
+                <div class="subtitle">SYSTEM</div>
+                <h2>SETTINGS</h2>
+
+                <div class="settings-list">
+
+                    <label class="setting">
+                        <span class="setting-text">
+                            <b>Bloom &amp; glow</b>
+                            <small>Neon light bleed. Turn off for more performance.</small>
+                        </span>
+                        <input type="checkbox" id="setting-bloom">
+                        <span class="switch"></span>
+                    </label>
+
+                    <label class="setting">
+                        <span class="setting-text">
+                            <b>Screen shake</b>
+                            <small>Camera kick on explosions and hits.</small>
+                        </span>
+                        <input type="checkbox" id="setting-shake">
+                        <span class="switch"></span>
+                    </label>
+
+                    <label class="setting">
+                        <span class="setting-text">
+                            <b>Damage numbers</b>
+                            <small>Floating numbers when you hit enemies.</small>
+                        </span>
+                        <input type="checkbox" id="setting-numbers">
+                        <span class="switch"></span>
+                    </label>
+
+                    <label class="setting">
+                        <span class="setting-text">
+                            <b>3D graphics</b>
+                            <small>Three.js renderer. Off uses the classic 2D view.</small>
+                        </span>
+                        <input type="checkbox" id="setting-3d">
+                        <span class="switch"></span>
+                    </label>
+
+                    <label class="setting">
+                        <span class="setting-text">
+                            <b>Low quality mode</b>
+                            <small>Lower resolution and fewer effects for slower devices.</small>
+                        </span>
+                        <input type="checkbox" id="setting-lowq">
+                        <span class="switch"></span>
+                    </label>
+
+                </div>
+
+                <button class="menu-btn back-btn" data-back>BACK</button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= PAUSE ================= -->
+
+    <section id="pause-screen" class="overlay hidden">
+
+        <div class="death-container">
+
+            <div class="subtitle">SIGNAL HELD</div>
+
+            <h2>PAUSED</h2>
+
+            <div class="menu-buttons">
+                <button id="resume-button" class="menu-btn primary">RESUME</button>
+                <button id="pause-restart-button" class="menu-btn">RESTART RUN</button>
+                <button id="pause-menu-button" class="menu-btn">MAIN MENU</button>
             </div>
 
         </div>
@@ -139,7 +321,14 @@
 
             <h2>YOU DIED</h2>
 
+            <div id="new-best" class="new-best hidden">NEW BEST SCORE</div>
+
             <div class="run-stats">
+
+                <div>
+                    <span>SCORE</span>
+                    <strong id="final-score">0</strong>
+                </div>
 
                 <div>
                     <span>DEPTH</span>
@@ -158,9 +347,18 @@
 
             </div>
 
-            <button id="restart-button">
-                TRY AGAIN
-            </button>
+            <div class="best-line">
+                BEST SCORE <b id="final-best">0</b>
+            </div>
+
+            <div class="menu-buttons row">
+                <button id="restart-button" class="menu-btn primary">
+                    TRY AGAIN
+                </button>
+                <button id="death-menu-button" class="menu-btn">
+                    MAIN MENU
+                </button>
+            </div>
 
         </div>
 
@@ -169,59 +367,66 @@
     <!-- ================= ROOM CLEAR ================= -->
 
     <section id="clear-screen" class="overlay hidden">
-    
+
         <div class="clear-container">
-    
+
             <div class="subtitle">
                 SECTOR CLEARED
             </div>
-    
+
             <h2 id="clear-title">ROOM COMPLETE</h2>
-    
+
             <p id="clear-message">
                 Preparing next sector...
             </p>
-    
+
+            <div id="victory-actions" class="menu-buttons row hidden">
+                <button id="victory-menu-button" class="menu-btn primary">
+                    MAIN MENU
+                </button>
+            </div>
+
         </div>
-    
+
     </section>
 
     <!-- ================= UPGRADE SCREEN ================= -->
 
     <section id="upgrade-screen" class="overlay hidden">
-    
+
         <div class="upgrade-panel">
-    
+
             <div class="subtitle">
                 SECTOR CLEARED
             </div>
-    
+
             <h2>UPGRADE STATION</h2>
-    
+
             <div class="upgrade-scrap">
                 SCRAP
                 <span id="upgrade-scrap">0</span>
             </div>
-    
+
             <p class="upgrade-subtitle">
                 Spend scrap to improve your equipment.
             </p>
-    
+
             <div id="upgrade-options" class="upgrade-options"></div>
-    
+
             <div class="upgrade-continue">
                 <button id="continue-button">
                     ENTER NEXT ROOM
                 </button>
             </div>
-    
+
         </div>
-    
+
     </section>
 
 </main>
 
 <script src="game.js"></script>
+<script type="module" src="renderer3d.js"></script>
 
 </body>
 </html>
