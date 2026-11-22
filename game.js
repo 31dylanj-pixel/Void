@@ -357,7 +357,6 @@ const player = {
 
     damage: 25,
     fireRate: BASE_FIRE_RATE,
-    reloadScale: 1,
     bulletSpeed: 720,
 
     multishot: 1,
@@ -467,13 +466,6 @@ const upgrades = {
         name: "NANO REPAIR",
         description: "+1.5 HP per second after 3s without damage",
         baseCost: 30,
-        tier: 0
-    },
-
-    reload: {
-        name: "QUICK RELOAD",
-        description: "-12% weapon reload time",
-        baseCost: 25,
         tier: 0
     },
 
@@ -1163,8 +1155,11 @@ const progressFill = document.getElementById("progress-fill");
 const menuPanels = {
     main: document.getElementById("menu-main"),
     howto: document.getElementById("menu-howto"),
-    settings: document.getElementById("menu-settings")
+    settings: document.getElementById("menu-settings"),
+    docs: document.getElementById("menu-docs")
 };
+const menuModalBackdrop = document.getElementById("menu-modal-backdrop");
+let lastMenuTrigger = null;
 
 document.addEventListener("click", e => {
     if (e.target.closest && e.target.closest("button") && !e.target.closest(".upgrade-card")) {
@@ -1172,9 +1167,29 @@ document.addEventListener("click", e => {
     }
 });
 
-function showMenuPanel(name) {
+function showMenuPanel(name, trigger = null) {
+    if (name !== "main" && trigger instanceof HTMLElement) {
+        lastMenuTrigger = trigger;
+    }
+
     for (const key in menuPanels) {
-        menuPanels[key].classList.toggle("hidden", key !== name);
+        const panel = menuPanels[key];
+        const isCurrent = key === name;
+        panel.classList.toggle("hidden", !isCurrent);
+        if (key !== "main") {
+            panel.setAttribute("aria-hidden", String(!isCurrent));
+        }
+    }
+
+    const isModal = name !== "main";
+    menuModalBackdrop.classList.toggle("hidden", !isModal);
+    menuModalBackdrop.setAttribute("aria-hidden", String(!isModal));
+
+    if (isModal) {
+        menuPanels[name].focus();
+    } else if (lastMenuTrigger) {
+        lastMenuTrigger.focus();
+        lastMenuTrigger = null;
     }
 }
 
@@ -1191,10 +1206,58 @@ restartButton.addEventListener("click", () => {
 });
 
 document.getElementById("howto-button")
-    .addEventListener("click", () => showMenuPanel("howto"));
+    .addEventListener("click", event => showMenuPanel("howto", event.currentTarget));
 
 document.getElementById("settings-button")
-    .addEventListener("click", () => showMenuPanel("settings"));
+    .addEventListener("click", event => showMenuPanel("settings", event.currentTarget));
+
+document.getElementById("docs-button")
+    .addEventListener("click", event => showMenuPanel("docs", event.currentTarget));
+
+menuModalBackdrop.addEventListener("click", () => showMenuPanel("main"));
+
+document.querySelectorAll("[data-doc-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+        const selected = button.dataset.docTab;
+        document.querySelectorAll("[data-doc-tab]").forEach(tab => {
+            const active = tab === button;
+            tab.setAttribute("aria-selected", String(active));
+        });
+        document.querySelectorAll("[role=tabpanel]").forEach(panel => {
+            const active = panel.id === `docs-${selected}`;
+            panel.classList.toggle("hidden", !active);
+            panel.setAttribute("aria-hidden", String(!active));
+        });
+    });
+});
+
+// Keep keyboard focus inside an open menu dialog.
+document.addEventListener("keydown", event => {
+    if (event.key !== "Tab") return;
+    const panel = Object.keys(menuPanels)
+        .filter(key => key !== "main")
+        .map(key => menuPanels[key])
+        .find(item => !item.classList.contains("hidden"));
+    if (!panel) return;
+
+    const focusable = Array.from(panel.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+    if (!focusable.length) {
+        event.preventDefault();
+        panel.focus();
+        return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+}, true);
 
 document.querySelectorAll("[data-back]").forEach(button => {
     button.addEventListener("click", () => showMenuPanel("main"));
@@ -1669,7 +1732,6 @@ function startGame() {
     player.speed = 270;
     player.damage = 25;
     player.fireRate = BASE_FIRE_RATE;
-    player.reloadScale = 1;
     player.bulletSpeed = 720;
     player.multishot = 1;
 
@@ -2280,7 +2342,7 @@ function shoot() {
     }
 
     player.shootCooldown =
-        player.fireRate * player.reloadScale * (rapidTime > 0 ? 0.6 : 1);
+        player.fireRate * (rapidTime > 0 ? 0.6 : 1);
     if (window.VoidAudio) VoidAudio.play("shoot");
 }
 
@@ -3628,10 +3690,6 @@ function applyUpgrade(key) {
             player.regen += 1.5;
             break;
 
-        case "reload":
-            player.reloadScale = Math.max(0.35, player.reloadScale * 0.88);
-            break;
-
         case "dashCore":
             player.dashMaxCooldown = Math.max(0.5, player.dashMaxCooldown * 0.85);
             break;
@@ -3723,7 +3781,6 @@ function renderUpgrades() {
         if (key === "explosive") icon = "✹";
         if (key === "voidRing") icon = "◎";
         if (key === "regen") icon = "✚";
-        if (key === "reload") icon = "↻";
         if (key === "dashCore") icon = "⇢";
 
         card.innerHTML = `
