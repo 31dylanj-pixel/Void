@@ -158,6 +158,9 @@
                     <button id="settings-button" class="menu-btn">
                         SETTINGS
                     </button>
+                    <button id="docs-button" class="menu-btn">
+                        DOCS
+                    </button>
                 </div>
 
                 <div class="menu-records" id="menu-records">
@@ -184,12 +187,14 @@
 
             </div>
 
+            <div id="menu-modal-backdrop" class="menu-modal-backdrop hidden" aria-hidden="true"></div>
+
             <!-- HOW TO PLAY -->
 
-            <div class="menu-panel hidden" id="menu-howto">
+            <div class="menu-panel hidden" id="menu-howto" role="dialog" aria-modal="true" aria-labelledby="menu-howto-title" tabindex="-1">
 
                 <div class="subtitle">FIELD MANUAL</div>
-                <h2>HOW TO PLAY</h2>
+                <h2 id="menu-howto-title">HOW TO PLAY</h2>
 
                 <p class="panel-text">
                     Clear every sector of the facility. Each room spawns a fixed number of enemies &mdash;
@@ -225,10 +230,10 @@
 
             <!-- SETTINGS -->
 
-            <div class="menu-panel hidden" id="menu-settings">
+            <div class="menu-panel hidden" id="menu-settings" role="dialog" aria-modal="true" aria-labelledby="menu-settings-title" tabindex="-1">
 
                 <div class="subtitle">SYSTEM</div>
-                <h2>SETTINGS</h2>
+                <h2 id="menu-settings-title">SETTINGS</h2>
 
                 <div class="settings-list">
 
@@ -435,6 +440,46 @@
                 <button id="continue-button">
                     ENTER NEXT ROOM
                 </button>
+            </div>
+
+            <!-- FIELD GUIDE -->
+            <div class="menu-panel docs-panel hidden" id="menu-docs" role="dialog" aria-modal="true" aria-labelledby="menu-docs-title" tabindex="-1">
+                <div class="subtitle">FIELD GUIDE</div>
+                <h2 id="menu-docs-title">DOCS</h2>
+                <p class="panel-text">Review the equipment available at upgrade stations and the enemy types found in the facility.</p>
+
+                <div class="docs-tabs" role="tablist" aria-label="Field guide sections">
+                    <button class="docs-tab" id="docs-upgrades-tab" type="button" role="tab" aria-selected="true" aria-controls="docs-upgrades" data-doc-tab="upgrades">UPGRADES</button>
+                    <button class="docs-tab" id="docs-enemies-tab" type="button" role="tab" aria-selected="false" aria-controls="docs-enemies" data-doc-tab="enemies">ENEMIES</button>
+                </div>
+
+                <section class="docs-list" id="docs-upgrades" role="tabpanel" aria-labelledby="docs-upgrades-tab">
+                    <article class="docs-entry"><h3>CORE</h3><p>Raises maximum health by 20% per tier and restores health to the new maximum.</p></article>
+                    <article class="docs-entry"><h3>THRUST</h3><p>Increases movement speed by 10% per tier.</p></article>
+                    <article class="docs-entry"><h3>WEAPON</h3><p>Increases weapon damage by 15% per tier.</p></article>
+                    <article class="docs-entry"><h3>OVERDRIVE</h3><p>Increases firing speed by reducing the time between shots by 10% per tier.</p></article>
+                    <article class="docs-entry"><h3>VELOCITY</h3><p>Increases projectile speed by 15% per tier.</p></article>
+                    <article class="docs-entry"><h3>SPLIT ROUND</h3><p>Adds one projectile to each shot per tier.</p></article>
+                    <article class="docs-entry"><h3>EXPLOSIVE BULLETS</h3><p>Bullets explode on impact. Additional tiers increase the explosion damage and radius.</p></article>
+                    <article class="docs-entry"><h3>VOID RING</h3><p>Creates a damaging ring around you. Additional tiers increase its radius and damage.</p></article>
+                    <article class="docs-entry"><h3>NANO REPAIR</h3><p>Restores 1.5 health per second after 3 seconds without taking damage. The effect stacks by tier.</p></article>
+                    <article class="docs-entry"><h3>DASH CORE</h3><p>Reduces dash cooldown by 15% per tier, down to a minimum cooldown of 0.5 seconds.</p></article>
+                </section>
+
+                <section class="docs-list hidden" id="docs-enemies" role="tabpanel" aria-labelledby="docs-enemies-tab" aria-hidden="true">
+                    <article class="docs-entry"><h3>CRAWLER</h3><p>Moves directly toward you. Keep moving to avoid contact damage.</p></article>
+                    <article class="docs-entry"><h3>SPLITTER</h3><p>Breaks into five crawlers when defeated.</p></article>
+                    <article class="docs-entry"><h3>GUNNER</h3><p>Uses a mounted barrel to attack from a distance.</p></article>
+                    <article class="docs-entry"><h3>VOIDLING</h3><p>Combines a void ring with a turret, threatening both nearby space and open lanes.</p></article>
+                    <article class="docs-entry"><h3>STALKER</h3><p>Rushes at roughly twice a crawler's speed.</p></article>
+                    <article class="docs-entry"><h3>VOID TITAN</h3><p>Boss enemy with a void ring and eight turrets.</p></article>
+                    <article class="docs-entry"><h3>[SHINY] CRAWLER</h3><p>A tougher crawler variant that breaks into seven crawlers when defeated.</p></article>
+                    <article class="docs-entry"><h3>[SHINY] SPLITTER</h3><p>A tougher splitter variant that breaks into three splitters.</p></article>
+                    <article class="docs-entry"><h3>HALO</h3><p>Uses a three-shot turret and a void ring.</p></article>
+                    <article class="docs-entry"><h3>[SHINY] GUNNER</h3><p>Uses a five-shot turret and splits into three gunners when defeated.</p></article>
+                </section>
+
+                <button class="menu-btn back-btn" data-back>BACK</button>
             </div>
 
         </div>
