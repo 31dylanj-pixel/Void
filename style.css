@@ -1764,11 +1764,16 @@ body:not(.gl-on) .menu-overlay {
 
 .menu-shell {
     width: min(560px, 92vw);
-    max-height: 100vh;
-    overflow-y: auto;
     padding: 24px 12px;
     text-align: center;
-    scrollbar-width: none;
+}
+
+@media (max-height: 700px) {
+    .menu-shell {
+        max-height: 100vh;
+        overflow-y: auto;
+        scrollbar-width: none;
+    }
 }
 
 .menu-shell::-webkit-scrollbar {
