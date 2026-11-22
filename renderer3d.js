@@ -1193,13 +1193,13 @@ function createRenderer(THREE, Addons) {
                 float t = clamp((r - 1.25) / 1.45, 0.0, 1.0);
 
                 float swirl = sin(a * 5.0 - uTime * 1.4 + r * 7.0) * 0.5 + 0.5;
-                float bands = sin(r * 38.0 - uTime * 2.2) * 0.5 + 0.5;
+                float bands = sin(r * 14.0 - uTime * 1.0) * 0.5 + 0.5;
 
                 float alpha = smoothstep(0.0, 0.12, t) * (1.0 - smoothstep(0.65, 1.0, t));
 
                 vec3 hot = vec3(1.0, 0.72, 0.4);
                 vec3 cold = vec3(0.42, 0.2, 1.0);
-                vec3 col = mix(hot, cold, t) * (0.45 + swirl * 0.9 + bands * 0.35) * 2.3;
+                vec3 col = mix(hot, cold, t) * (0.6 + swirl * 0.55 + bands * 0.15) * 1.8;
 
                 gl_FragColor = vec4(col, alpha * 0.85);
             }
